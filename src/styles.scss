@@ -1,0 +1,212 @@
+
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@use '@angular/material' as mat;
+// Plus imports for other components in your app.
+
+// Include the common styles for Angular Material. We include this here so that you only
+// have to load a single css file for Angular Material in your app.
+// Be sure that you only ever include this mixin once!
+@include mat.core();
+
+// Define the palettes for your theme using the Material Design palettes available in palette.scss
+// (imported above). For each palette, you can optionally specify a default, lighter, and darker
+// hue. Available color palettes: https://material.io/design/color/
+$firstApp-primary: mat.define-palette(mat.$indigo-palette);
+$firstApp-accent: mat.define-palette(mat.$pink-palette, A200, A100, A400);
+
+// The warn palette is optional (defaults to red).
+$firstApp-warn: mat.define-palette(mat.$red-palette);
+
+// Create the theme object. A theme consists of configurations for individual
+// theming systems such as "color" or "typography".
+$firstApp-theme: mat.define-light-theme((
+  color: (
+    primary: $firstApp-primary,
+    accent: $firstApp-accent,
+    warn: $firstApp-warn,
+  )
+));
+
+// Include theme styles for core and each component used in your app.
+// Alternatively, you can import and @include the theme mixins for each component
+// that you are using.
+@include mat.all-component-themes($firstApp-theme);
+
+/* You can add global styles to this file, and also import other style files */
+@import '~bootstrap/dist/css/bootstrap.min.css';
+body {
+    margin: 0;
+    height: 100%;
+    font-family: Roboto, FreeSans, Helvetica, sans-serif;
+   }
+   
+   .header .p-menubar {
+    padding: 0 0.5rem;
+    background: inherit;
+    border: none;
+   
+    .p-menubar-root-list {
+    background: #00488a;
+    }
+   
+    .p-menubar-root-list > .p-menuitem > .p-menuitem-link {
+        padding: 0 0.5rem 0.25rem;
+   
+        .p-menuitem-text {
+        color: white;
+        }
+    }
+   
+    .p-menubar-root-list > .p-menuitem > .p-menuitem-link:not(.p-disabled):hover {
+    background: inherit;
+   
+        .p-menuitem-text {
+        color: darken(white, 20%);
+        }
+    }
+   }
+
+   hr.style1{
+	border-top: 1px solid #8c8b8b;
+    }
+   
+   .match-parent {
+    width: 100%;
+   }
+   
+   .button-group {
+    p-button:not(:last-child) {
+    margin-right: 0.5rem;
+    }
+   }
+   
+   .p-dialog-content.dialog-overlay {
+    overflow-y: visible;
+   }
+   
+   [formControlName].ng-touched.ng-invalid input {
+    border-color: red;
+   }
+   
+   p-dialog > div {
+    z-index: 4;
+   
+    > div {
+    z-index: 5;
+    }
+   }
+   
+   .icon {
+    width: 24px;
+    height: 24px;
+    margin-right: 0.25em;
+    background-size: contain;
+    display: inline-block;
+   }
+   
+   
+   .clear-fieldset {
+    border: none;
+    margin-inline: 0;
+    padding-inline: 0;
+    padding-block: 0;
+   }
+   
+   .sekcja-formularza {
+    margin-bottom: 1rem;
+    border: none;
+    margin-inline: 0;
+    padding-inline: 0;
+    padding-block: 0;
+   
+    > div {
+    width: 50%;
+    margin: 0.2rem 0.2rem;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    }
+   
+    > p-button {
+    margin-right: 1rem;
+    }
+   }
+   
+   .pole-formularza {
+       width: 100%;
+
+   }
+
+   .ppk-formularz {
+        padding: 10px;
+        width: 30%;
+   }
+
+   .etykieta-formularza {
+        padding: 1rem;
+        width: 50%;
+   }
+
+   .koszty {
+       color: red;
+   }
+
+   .label-formularza {
+        padding: 0.3rem;
+        width: 80%;
+    }
+
+    .parametry-formularza {
+        padding: 0.3rem;
+        width: 50%;
+    }
+   
+   .sekcja-przyciski-formularza {
+    display: flex;
+    justify-content: flex-start;
+   
+    p-button:not(:last-child) {
+    margin-right: 0.5rem;
+    }
+   }
+   
+   .formularz {
+    margin-left: 1rem;
+   }
+   
+   .naglowek {
+    display: flex;
+    align-items: center;
+   
+    h2 {
+    flex: 1;
+    margin: 0;
+    }
+   }
+   
+   .formularz-dialog {
+   
+    > * {
+    display: block;
+    }
+   
+    label.required:after {
+    content: "*";
+    font-weight: bold;
+    color: red;
+    }
+   
+    .error {
+    font-weight: bold;
+    color: #f44336;
+    }
+   }
+   
+   .warning {
+    font-weight: bold;
+    color: #d5a326;
+   }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

@@ -1,0 +1,358 @@
+
+<div class="container">
+  <div class="row">
+    <div class="col" [style]="{'padding-top': '1em'}">
+      <p-card header="Kalkulator wynagrodzeń" [style]="{'margin-bottom': '2em'}">
+        <div class="pole-formularza">
+          <label class="parametry-formularza" for="rodzajeUmowy"> Rodzaj umowy: </label>
+          <p-dropdown
+            [options]="rodzajeUmowy"
+            [(ngModel)]="rodzajUmowy"
+            placeholder="Wybierz..."
+          ></p-dropdown>
+        </div>
+        <div class="pole-formularza">
+          <label class="parametry-formularza" for="rokPodatkowy"> Rok podatkowy: </label>
+          <p-dropdown
+            [options]="rokPodatkowy"
+            [(ngModel)]="rok"
+            placeholder="Wybierz..."
+          ></p-dropdown>
+        </div>
+        <div class="pole-formularza">
+          <label class="parametry-formularza" for="basedParameters.grossIncome"> Wynagrodzenie brutto: </label>
+          <p-inputNumber
+            id="basedParameters.grossIncome"
+            [(ngModel)]="basedParameters.grossIncome"
+            placeholder="Podaj kwotę w zł"
+            mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2"
+            (onBlur)="obliczKwoty()"
+          ></p-inputNumber>
+        </div>    
+
+        <div class="pole-formularza">
+          <label class="parametry-formularza" for="basedParameters.additionalBenefits"> Dodatkowy przychód / Benefity: </label>
+          <p-inputNumber
+            id="basedParameters.additionalBenefits"
+            [(ngModel)]="basedParameters.additionalBenefits"
+            placeholder="Podaj kwotę w zł"
+            mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2"
+            (onBlur)="obliczKwoty()"
+          ></p-inputNumber>
+        </div>    
+        <div class="pole-formularza">
+          <label class="parametry-formularza" for="accidentContributionPercent"> Stopa procentowa składki
+            na ubezpieczenie wypadkowe: </label>
+          <p-inputNumber
+            id="accidentContributionPercent"
+            [(ngModel)]="basedParameters.accidentContributionPercent"
+            type="number"
+            mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2"
+            [max]="4"
+            (onBlur)="obliczKwoty()"
+            suffix="%"
+          ></p-inputNumber>
+        </div>
+      
+        <div class="pole-formularza">
+          <label class="parametry-formularza" for="isTaxFreeAmount"> Czy uwzględniać kwotę wolną od podatku: </label>
+          <mat-slide-toggle [(ngModel)]="basedParameters.isTaxFreeAmount" (change)="obliczKwoty()" id="isTaxFreeAmount">
+          </mat-slide-toggle>
+        </div>
+      
+        <div class="pole-formularza">
+          <label class="parametry-formularza" for="isWorkOutsideHome"> Praca poza miejscem zamieszkania: </label>
+          <mat-slide-toggle [(ngModel)]="basedParameters.isWorkOutsideHome" (change)="obliczKwoty()" id="isWorkOutsideHome">
+          </mat-slide-toggle>
+        </div>
+      
+        <div class="pole-formularza">
+          <label class="parametry-formularza" for="isAuthorRights">Autorskie koszty uzyskania przychodu:</label>
+          <mat-slide-toggle [(ngModel)]="basedParameters.isAuthorRights" (change)="obliczKwoty()" id="isAuthorRights">
+          </mat-slide-toggle>
+          <p style="margin-left: 8px;" *ngIf="basedParameters.isAuthorRights">Procent kwoty brutto dla których maja zastosowanie:
+          <p-inputNumber
+          id="authorRightsPercent"
+          [(ngModel)]="basedParameters.authorRightsPercent"
+          type="number"
+          [maxlength]=4
+          [size]=4
+          mode="decimal"
+          [max]="100"
+          (onBlur)="obliczKwoty()"
+          suffix="%"
+        ></p-inputNumber>
+        </p>
+        </div>
+      
+        <div class="pole-formularza">
+          <label class="parametry-formularza" for="isUnder26Age"> Wiek poniżej 26 lat:</label>
+          <mat-slide-toggle [(ngModel)]="basedParameters.isUnder26Age" (change)="obliczKwoty()" id="isUnder26Age">
+          </mat-slide-toggle>
+        </div>
+      
+        <div class="pole-formularza">
+          <label class="parametry-formularza" for="isPPK"> PPK:</label>
+          <mat-slide-toggle [(ngModel)]="basedParameters.isPPK" (change)="obliczKwoty()" id="isPPK">
+          </mat-slide-toggle>
+        </div>
+        <div *ngIf="basedParameters.isPPK">
+          <p-card header="Składki PPK:">
+            <div class="row">
+              <div class="col-6">
+                <label for="ppkPracownik">Podstawowa pracownika: </label>
+                <p-inputNumber [(ngModel)]="ppkParameters.employeeContributionPercent" 
+                  [showButtons]="true" 
+                  buttonLayout="horizontal" 
+                  spinnerMode="horizontal"
+                  decrementButtonClass="p-button-danger" 
+                  incrementButtonClass="p-button-success" 
+                  incrementButtonIcon="pi pi-plus" 
+                  decrementButtonIcon="pi pi-minus" 
+                  suffix="%" [size]="5"
+                  [step]="0.5" [min]="0" [max]="4"
+                  (onInput)="obliczKwoty()"
+                  mode="decimal">
+                </p-inputNumber>
+                <label for="ppkPracodawca">Podstawowa pracodawcy: </label>
+                <p-inputNumber [(ngModel)]="ppkParameters.employerContributionPercent" 
+                  [showButtons]="true" 
+                  buttonLayout="horizontal" 
+                  spinnerMode="horizontal"
+                  decrementButtonClass="p-button-danger" 
+                  incrementButtonClass="p-button-success" 
+                  incrementButtonIcon="pi pi-plus" 
+                  decrementButtonIcon="pi pi-minus" 
+                  suffix="%" [size]="5"
+                  [step]="0.5" [min]="0" [max]="4"
+                  (onInput)="obliczKwoty()"
+                  mode="decimal">
+                </p-inputNumber>
+              </div>
+              <div class="col-6">
+                <label for="ppkPracownikDodatkowa">Dodatkowa pracownika: </label>
+                <p-inputNumber [(ngModel)]="ppkParameters.addEmployeeContributionPercent" 
+                  [showButtons]="true" 
+                  buttonLayout="horizontal" 
+                  spinnerMode="horizontal"
+                  decrementButtonClass="p-button-danger" 
+                  incrementButtonClass="p-button-success" 
+                  incrementButtonIcon="pi pi-plus" 
+                  decrementButtonIcon="pi pi-minus" 
+                  suffix="%" [size]="5"
+                  [step]="0.5" [min]="0" [max]="4"
+                  (onInput)="obliczKwoty()"
+                  mode="decimal">
+                </p-inputNumber>
+                <label for="ppkPracodawcaDodatkowa">Dodatkowa pracodawcy: </label>
+                <p-inputNumber [(ngModel)]="ppkParameters.addEmployerContributionPercent" 
+                  [showButtons]="true" 
+                  buttonLayout="horizontal" 
+                  spinnerMode="horizontal"
+                  decrementButtonClass="p-button-danger" 
+                  incrementButtonClass="p-button-success" 
+                  incrementButtonIcon="pi pi-plus" 
+                  decrementButtonIcon="pi pi-minus" 
+                  suffix="%" [size]="5"
+                  [step]="0.5" [min]="0" [max]="4"
+                  (onInput)="obliczKwoty()"
+                  mode="decimal">
+                </p-inputNumber>
+              </div>
+            </div>
+        </p-card>
+            
+        </div>
+        </p-card>
+    </div>
+    <div class="col"  [style]="{'padding-top': '1em'}">
+      <p-card header="Podsumowanie" [style]="{'width': '35rem', 'margin-bottom': '2em'}">
+        <div class="form-group row">
+          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Kwota brutto: </label>
+          <div class="col-sm-4">
+            <input type="text" disabled 
+            [(ngModel)]="basedParameters.grossIncome"
+            class="form-control form-control-sm" id="colFormLabelSm">
+          </div>
+        </div>
+        <hr class="style1">
+        <div class="form-group row">
+          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">ZUS: </label>
+          <div class="col-sm-4">
+            <input type="text" disabled 
+            [(ngModel)]="razemPracownikZUS"
+            class="form-control form-control-sm" id="colFormLabelSm" >
+          </div>
+          <div class="col-sm-2 col-form-label col-form-label-sm">
+            <label>{{summaryParameters.zusPercent}} %</label>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">NFZ: </label>
+          <div class="col-sm-4">
+            <input type="text" disabled 
+            [(ngModel)]="healthyContributions.employeeValue"
+            class="form-control form-control-sm" id="colFormLabelSm">
+          </div>
+          <div class="col-sm-2 col-form-label col-form-label-sm">
+            <label>{{summaryParameters.nfzPercent}} %</label>
+          </div>
+        </div>
+        <div class="form-group row" *ngIf="basedParameters.isPPK">
+          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">PPK: </label>
+          <div class="col-sm-4">
+            <input type="text" disabled 
+            [(ngModel)]="ppkParameters.ppkEmployeeAmount"
+            class="form-control form-control-sm" id="colFormLabelSm">
+          </div>
+          <div class="col-sm-2 col-form-label col-form-label-sm">
+            <label>{{summaryParameters.ppkPercent}} %</label>
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Podatek: </label>
+          <div class="col-sm-4">
+            <input type="text" disabled 
+            [(ngModel)]="taxContributions.advanceTax"
+            class="form-control form-control-sm" id="colFormLabelSm">
+          </div>
+          <div class="col-sm-2 col-form-label col-form-label-sm">
+            <label>{{summaryParameters.taxPercent}} %</label>
+          </div>
+        </div>
+          <hr class="style1">
+        <div class="form-group row">
+          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Kwota netto: </label>
+          <div class="col-sm-4">
+            <input type="text" disabled 
+            [(ngModel)]="basedParameters.netIncome"
+            class="form-control form-control-sm" id="colFormLabelSm">
+          </div>
+          <div class="col-sm-2 col-form-label col-form-label-sm">
+            <label>{{summaryParameters.netIncomePercent}} %</label>
+          </div>
+        </div>
+        <hr class="style1">
+        <div class="form-group row">
+          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Koszt pracodawcy: </label>
+          <div class="col-sm-4">
+            <input type="text" disabled 
+            [(ngModel)]="basedParameters.totalEmployerCosts"
+            class="form-control form-control-sm" id="colFormLabelSm">
+          </div>
+          <div class="col-sm-2 col-form-label col-form-label-sm">
+            <label>{{summaryParameters.employerPercent}} %</label>
+          </div>
+        </div>
+    </p-card>
+    </div>
+  </div>
+
+
+<br/>
+  <p-table [value]="contributions" responsiveLayout="scroll">
+    <ng-template pTemplate="header">
+        <tr>
+            <th rowspan="3">Składki ZUS</th>
+        </tr>
+        <tr>
+            <th colspan="2">Pracownik</th>
+            <th colspan="2">Pracodawca</th>
+        </tr>
+        <tr>
+            <th>Wysokość składki w %</th>
+            <th>Kwota</th>
+            <th>Wysokość składki w %</th>
+            <th>Kwota</th>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-contribution>
+        <tr>
+            <td>{{contribution.contribution}}</td>
+            <td>{{contribution.employeePart}} %</td>
+            <td>{{contribution.employeeValue}} zł</td>
+            <td>{{contribution.employerPart}} %</td>
+            <td>{{contribution.employerValue}} zł</td>
+        </tr>
+    </ng-template>
+    <ng-template pTemplate="footer">
+        <tr>
+            <td colspan="1" class="text-right">Razem</td>
+            <td>{{totalEmployeePart}} %</td>
+            <td>{{razemPracownikZUS}} zł</td>
+            <td>{{totalEmployerPart}} %</td>
+            <td>{{razemPracodawcaZUS}} zł</td>
+        </tr>
+    </ng-template>
+</p-table>
+<br/>
+<p-table responsiveLayout="scroll">
+  <ng-template pTemplate="header">
+      <tr>
+          <th rowspan="3">Składka NFZ</th>
+      </tr>
+      <tr>
+          <th>Podstawa opodatkowania</th>
+          <th>Wysokość składki w %</th>
+          <th>Kwota</th>
+      </tr>
+  </ng-template>
+  <ng-template pTemplate="footer">
+    <tr>
+      <td colspan="1" class="text-right"></td>
+      <td>{{healthyContributions.baseOfHealthyContribution}} zł</td>
+      <td>{{healthyContributions.employeePart}} %</td>
+      <td>{{healthyContributions.employeeValue}} zł</td>
+  </tr>
+  </ng-template>
+</p-table>
+<br/>
+<p-table *ngIf="basedParameters.isPPK" responsiveLayout="scroll">
+  <ng-template pTemplate="header">
+      <tr>
+          <th rowspan="3">PPK</th>
+      </tr>
+      <tr>
+          <th>Składka pracownika</th>
+          <th>Składka pracodawcy</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="footer">
+        <tr>
+            <td></td>
+            <td>{{ppkParameters.ppkEmployeeAmount}} zł</td>
+            <td>{{ppkParameters.ppkEmployerAmount}} zł</td>
+        </tr>
+    </ng-template>
+</p-table>
+<br/>
+<p-table responsiveLayout="scroll">
+  <ng-template pTemplate="header">
+      <tr>
+          <th rowspan="3">Podatek</th>
+      </tr>
+      <tr>
+          <th>Koszt uzyskania przychodu</th>
+          <th>Ulga klasy średniej</th>
+          <th>Podstawa opodatkowania</th>
+          <th>Obliczony podatek</th>
+          <th>Kwota wolna od podatku</th>
+          <th>Zaliczka na podatek</th>
+      </tr>
+  </ng-template>
+  <ng-template pTemplate="footer">
+      <tr>
+          <td></td>
+          <td>{{taxContributions.incomeCost}} zł</td>
+          <td>{{taxContributions.middleClassRelief}} zł</td>
+          <td>{{taxContributions.baseOfTax}} zł</td>
+          <td>{{taxContributions.tax}} zł</td>
+          <td>{{taxContributions.taxFreeAmount}} zł</td>
+          <td>{{taxContributions.advanceTax}} zł</td>
+      </tr>
+  </ng-template>
+</p-table>
+<br/>
+
+</div>
+

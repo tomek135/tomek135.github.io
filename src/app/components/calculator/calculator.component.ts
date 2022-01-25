@@ -1,0 +1,305 @@
+import { Component} from '@angular/core';
+
+@Component({
+  selector: 'app-calculator',
+  templateUrl: './calculator.component.html',
+  styleUrls: ['./calculator.component.css']
+})
+export class CalculatorComponent{
+
+static PENSION_EMPLOYEE_PART : number = 9.76;
+static PENSION_EMPLOYER_PART : number = 9.76;
+static SICKNESS_EMPLOYEE_PART : number = 2.45;
+static DISABILITY_EMPLOYEE_PART : number = 1.5;
+static DISABILITY_EMPLOYER_PART : number = 8.5;
+static HEALTHY_EMPLOYEE_PART : number = 9.0;
+static TOTAL_EMPLOYEE_PART : number = CalculatorComponent.DISABILITY_EMPLOYEE_PART + CalculatorComponent.PENSION_EMPLOYEE_PART + CalculatorComponent.SICKNESS_EMPLOYEE_PART;
+static TOTAL_EMPLOYER_PART : number = CalculatorComponent.DISABILITY_EMPLOYER_PART + CalculatorComponent.PENSION_EMPLOYER_PART ;
+
+rodzajeUmowy: any[];
+rokPodatkowy: any[];
+skEmerytalnaPracownik: number= 0;
+skRentowaPracownik: number= 0;
+skRentowaPracodawca: number= 0;
+skChorobowaPracownik: number= 0;
+skEmerytalnaPracodawca: number= 0;
+skWypadkowaPracodawca: number= 0;
+razemPracodawcaZUS: number =0;
+razemPracownikZUS: number= 0;
+
+rodzajUmowy: string='';
+rok: string='';
+
+contributions: any[] = [];
+
+basedParameters = {
+  accidentContributionPercent: 0.67,
+  authorRightsPercent: 0,
+  grossIncome: 0,
+  additionalBenefits: 0,
+  netIncome: 0,
+  increasedIncomeCost: 0,
+  totalEmployerCosts: 0,
+  isPPK: false,
+  isAuthorRights: false,
+  isTaxFreeAmount: false,
+  isUnder26Age: false,
+  isWorkOutsideHome: false
+};
+
+ppkParameters = {
+  employeeContributionPercent: 2,
+  employerContributionPercent: 1.5,
+  addEmployeeContributionPercent: 0,
+  addEmployerContributionPercent: 0,
+  ppkEmployeeAmount: 0,
+  ppkEmployerAmount: 0
+};
+
+healthyContributions = {
+  baseOfHealthyContribution: 0,
+  employeePart: CalculatorComponent.HEALTHY_EMPLOYEE_PART, 
+  employeeValue: 0
+};
+
+taxContributions = {
+  incomeCost: 0,
+  middleClassRelief: 0,
+  baseOfTax: 0,
+  tax: 0,
+  taxFreeAmount: 0, 
+  advanceTax: 0 
+};
+
+summaryParameters ={
+  zusPercent: 0,
+  nfzPercent: 0,
+  ppkPercent: 0,
+  taxPercent: 0,
+  netIncomePercent: 0,
+  employerPercent: 0
+}
+
+constructor(){
+  this.rodzajeUmowy = [    
+    {label: 'Umowa o Pracę', rodzajUmowy: 'UoP'},
+    {label: 'Umowa zlecenie', rodzajUmowy: 'UZ'}];
+  this.rokPodatkowy = [
+    {label: '2021', rok: '2021'},
+    {label: '2022', rok: '2022'}
+  ];
+
+  this.contributions = [
+    {
+      contribution: 'Emerytalne', 
+      employeePart: CalculatorComponent.PENSION_EMPLOYEE_PART, 
+      employeeValue: this.skEmerytalnaPracownik, 
+      employerPart: CalculatorComponent.PENSION_EMPLOYER_PART, 
+      employerValue: this.skEmerytalnaPracodawca,
+    },
+    {
+      contribution: 'Rentowe', 
+      employeePart: CalculatorComponent.DISABILITY_EMPLOYEE_PART, 
+      employeeValue: this.skRentowaPracownik, 
+      employerPart: CalculatorComponent.DISABILITY_EMPLOYER_PART, 
+      employerValue: this.skRentowaPracodawca
+    },
+    {
+      contribution: 'Chorobowe', 
+      employeePart: CalculatorComponent.SICKNESS_EMPLOYEE_PART, 
+      employeeValue: this.skChorobowaPracownik, 
+      employerPart: 0, 
+      employerValue: 0
+    },
+    {
+      contribution: 'Wypadkowe', 
+      employeePart: 0, 
+      employeeValue: 0, 
+      employerPart: this.basedParameters.accidentContributionPercent, 
+      employerValue: this.skWypadkowaPracodawca
+    }
+];
+
+}
+
+get totalEmployeePart(){
+  return CalculatorComponent.TOTAL_EMPLOYEE_PART;
+}
+
+get totalEmployerPart(){
+  return Math.round((CalculatorComponent.TOTAL_EMPLOYER_PART+this.basedParameters.accidentContributionPercent)*100)/100;
+}
+
+
+obliczKwoty(){
+
+  this.calculateZUSContributions();
+  this.calculateHealthyContributions();
+  this.calculatePPKContributions();
+  this.calculateTaxContributions();
+  this.basedParameters.netIncome = this.dajKwoteNetto();
+  this.basedParameters.totalEmployerCosts = Math.round((this.basedParameters.grossIncome+this.razemPracodawcaZUS+this.ppkParameters.ppkEmployerAmount)*100)/100;
+  this.calculateSummaryParameters();
+  this.contributions = [
+    {
+      contribution: 'Emerytalne', 
+      employeePart: CalculatorComponent.PENSION_EMPLOYEE_PART, 
+      employeeValue: this.skEmerytalnaPracownik, 
+      employerPart: CalculatorComponent.PENSION_EMPLOYER_PART, 
+      employerValue: this.skEmerytalnaPracodawca,
+    },
+    {
+      contribution: 'Rentowe', 
+      employeePart: CalculatorComponent.DISABILITY_EMPLOYEE_PART, 
+      employeeValue: this.skRentowaPracownik, 
+      employerPart: CalculatorComponent.DISABILITY_EMPLOYER_PART, 
+      employerValue: this.skRentowaPracodawca
+    },
+    {
+      contribution: 'Chorobowe', 
+      employeePart: CalculatorComponent.SICKNESS_EMPLOYEE_PART, 
+      employeeValue: this.skChorobowaPracownik, 
+      employerPart: 0, 
+      employerValue: 0
+    },
+    {
+      contribution: 'Wypadkowe', 
+      employeePart: 0, 
+      employeeValue: 0, 
+      employerPart: this.basedParameters.accidentContributionPercent, 
+      employerValue: this.skWypadkowaPracodawca
+    }
+  ];
+
+  }
+
+dajKwoteNetto(): number {
+    var kwota = this.basedParameters.grossIncome
+                -this.healthyContributions.employeeValue
+                -this.razemPracownikZUS
+                -this.ppkParameters.ppkEmployeeAmount
+                -this.taxContributions.advanceTax;
+    return Math.round(kwota*100)/100; 
+  }
+dajKwoteWolnaOdPodatku(): number {
+  if(!(this.basedParameters.grossIncome > 0) || !this.basedParameters.isTaxFreeAmount){
+    return 0;
+  }
+  else{
+    return 425;
+  }
+}
+
+dajKwoteKosztow(): number {
+  var wyliczonaKwota: number = 0;
+  if(!(this.basedParameters.grossIncome > 0)) return 0;
+  if(this.basedParameters.isWorkOutsideHome){
+    wyliczonaKwota = 300;
+  }
+  else{
+    wyliczonaKwota = 250;
+  }
+  if(this.basedParameters.isAuthorRights){
+      if((100-this.basedParameters.authorRightsPercent)*this.basedParameters.grossIncome/100 < wyliczonaKwota){
+        wyliczonaKwota = (100-this.basedParameters.authorRightsPercent)*this.basedParameters.grossIncome/100;
+      }
+    wyliczonaKwota += (this.basedParameters.authorRightsPercent*(this.basedParameters.grossIncome-this.razemPracownikZUS))*0.5/100;
+  }
+  return Math.round(wyliczonaKwota*100)/100;
+}
+
+
+private obliczUlgeKlasySredniej(kwota: number, czyPPK: boolean){
+  var wyliczonaUlga: number = 0;
+  if(czyPPK){
+    kwota = this.basedParameters.grossIncome + this.ppkParameters.ppkEmployerAmount; 
+    if( kwota < 8549){
+      wyliczonaUlga = (kwota*0.0668-380.5)/0.17*100;
+    } else{
+      wyliczonaUlga = (kwota*(-0.0735)+819.08)/0.17*100;
+    }
+  }else{
+    if(kwota < 8549){
+      wyliczonaUlga = (kwota*0.0668-380.5)/0.17*100;
+    } else{
+      wyliczonaUlga = (kwota*(-0.0735)+819.08)/0.17*100;
+    }
+  }
+
+  if(wyliczonaUlga<0)
+    wyliczonaUlga = 0;
+ return Math.round(wyliczonaUlga)/100;
+}
+
+private obliczPodstaweOpodatkowania(){
+  var wyliczonaKwota: number = 0;
+  wyliczonaKwota = this.basedParameters.grossIncome 
+    - this.razemPracownikZUS
+    - this.taxContributions.incomeCost
+    - this.taxContributions.middleClassRelief
+    + this.ppkParameters.ppkEmployerAmount;
+    if(wyliczonaKwota<0)
+    wyliczonaKwota = 0;
+    return Math.round(wyliczonaKwota);
+}
+
+private calculatePPKContributions(){
+  if(this.basedParameters.isPPK){
+    this.ppkParameters.ppkEmployeeAmount = Math.round(this.basedParameters.grossIncome*(this.ppkParameters.employeeContributionPercent+this.ppkParameters.addEmployeeContributionPercent))/100;
+    this.ppkParameters.ppkEmployerAmount = Math.round(this.basedParameters.grossIncome*(this.ppkParameters.employerContributionPercent+this.ppkParameters.addEmployerContributionPercent))/100;
+  }
+  else{
+    this.ppkParameters.ppkEmployeeAmount = 0;
+    this.ppkParameters.ppkEmployerAmount = 0;
+  }
+}
+
+private calculateHealthyContributions(){
+  this.healthyContributions.baseOfHealthyContribution =  Math.round((this.basedParameters.grossIncome-this.razemPracownikZUS)*100)/100;   
+  this.healthyContributions.employeeValue = Math.round((this.healthyContributions.baseOfHealthyContribution)*0.09*100)/100;
+  
+}
+
+private calculateZUSContributions(){
+  this.skEmerytalnaPracownik = Math.round(0.0976*this.basedParameters.grossIncome*100)/100;
+  this.skChorobowaPracownik =Math.round( 0.0245*this.basedParameters.grossIncome*100)/100;
+  this.skRentowaPracownik = Math.round(0.015*this.basedParameters.grossIncome*100)/100;
+  this.skEmerytalnaPracodawca = Math.round(0.0976*this.basedParameters.grossIncome*100)/100;
+  this.skRentowaPracodawca = Math.round(0.065*this.basedParameters.grossIncome*100)/100;
+  this.skWypadkowaPracodawca = Math.round(this.basedParameters.accidentContributionPercent/100*this.basedParameters.grossIncome*100)/100;
+  this.razemPracodawcaZUS = Math.round((this.skEmerytalnaPracodawca 
+                        + this.skRentowaPracodawca 
+                        + this.skWypadkowaPracodawca)*100)/100;
+  this.razemPracownikZUS = Math.round((this.skEmerytalnaPracownik 
+                        + this.skRentowaPracownik
+                        + this.skChorobowaPracownik)*100)/100;
+}
+
+private calculateTaxContributions(){
+  this.taxContributions.taxFreeAmount = this.dajKwoteWolnaOdPodatku();
+  this.taxContributions.incomeCost = this.dajKwoteKosztow();
+  this.taxContributions.middleClassRelief = this.obliczUlgeKlasySredniej(this.basedParameters.grossIncome, this.basedParameters.isPPK);
+  this.taxContributions.baseOfTax = this.obliczPodstaweOpodatkowania();
+  this.taxContributions.tax = Math.round(this.taxContributions.baseOfTax*0.17);
+  this.taxContributions.advanceTax = Math.round((this.taxContributions.tax - this.taxContributions.taxFreeAmount)*100)/100;
+  if(this.basedParameters.isUnder26Age){
+    this.taxContributions.advanceTax = 0.00;
+  }
+  if(this.taxContributions.advanceTax < 0){
+    this.taxContributions.advanceTax = 0;
+  }
+}
+
+private calculateSummaryParameters(){
+  if(this.basedParameters.grossIncome>0){
+    this.summaryParameters.netIncomePercent = Math.round((this.basedParameters.netIncome/this.basedParameters.grossIncome)*10000)/100;
+    this.summaryParameters.zusPercent = Math.round((this.razemPracownikZUS/this.basedParameters.grossIncome)*10000)/100;
+    this.summaryParameters.nfzPercent = Math.round((this.healthyContributions.employeeValue/this.basedParameters.grossIncome)*10000)/100;
+    this.summaryParameters.taxPercent = Math.round((this.taxContributions.advanceTax/this.basedParameters.grossIncome)*10000)/100;
+    this.summaryParameters.ppkPercent = Math.round((this.ppkParameters.ppkEmployeeAmount/this.basedParameters.grossIncome)*10000)/100;
+    this.summaryParameters.employerPercent = Math.round((this.basedParameters.totalEmployerCosts/this.basedParameters.grossIncome)*10000)/100;
+  }
+}
+
+}
+
