@@ -41,30 +41,10 @@ body {
     font-family: Roboto, FreeSans, Helvetica, sans-serif;
    }
    
-   .header .p-menubar {
+   .header {
     padding: 0 0.5rem;
     background: inherit;
     border: none;
-   
-    .p-menubar-root-list {
-    background: #00488a;
-    }
-   
-    .p-menubar-root-list > .p-menuitem > .p-menuitem-link {
-        padding: 0 0.5rem 0.25rem;
-   
-        .p-menuitem-text {
-        color: white;
-        }
-    }
-   
-    .p-menubar-root-list > .p-menuitem > .p-menuitem-link:not(.p-disabled):hover {
-    background: inherit;
-   
-        .p-menuitem-text {
-        color: darken(white, 20%);
-        }
-    }
    }
 
    hr.style1{
@@ -83,18 +63,6 @@ body {
    
    .p-dialog-content.dialog-overlay {
     overflow-y: visible;
-   }
-   
-   [formControlName].ng-touched.ng-invalid input {
-    border-color: red;
-   }
-   
-   p-dialog > div {
-    z-index: 4;
-   
-    > div {
-    z-index: 5;
-    }
    }
    
    .icon {
@@ -149,10 +117,6 @@ body {
         width: 50%;
    }
 
-   .koszty {
-       color: red;
-   }
-
    .label-formularza {
         padding: 0.3rem;
         width: 80%;
@@ -176,23 +140,7 @@ body {
     margin-left: 1rem;
    }
    
-   .naglowek {
-    display: flex;
-    align-items: center;
-   
-    h2 {
-    flex: 1;
-    margin: 0;
-    }
-   }
-   
-   .formularz-dialog {
-   
-    > * {
-    display: block;
-    }
-   
-    label.required:after {
+    .label-required:after {
     content: "*";
     font-weight: bold;
     color: red;
@@ -200,9 +148,10 @@ body {
    
     .error {
     font-weight: bold;
+    font-size: smaller;
     color: #f44336;
     }
-   }
+
    
    .warning {
     font-weight: bold;

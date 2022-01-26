@@ -3,24 +3,29 @@
   <div class="row">
     <div class="col" [style]="{'padding-top': '1em'}">
       <p-card header="Kalkulator wynagrodzeń" [style]="{'margin-bottom': '2em'}">
+        <div class="alert alert-danger" role="alert" *ngIf="errors">
+          Uzupełnij obowiązkowe pola oznaczone * aby otrzymać wynik.
+        </div>
         <div class="pole-formularza">
-          <label class="parametry-formularza" for="rodzajeUmowy"> Rodzaj umowy: </label>
+          <label class="parametry-formularza label-required" for="contractsType"> Rodzaj umowy: </label>
           <p-dropdown
-            [options]="rodzajeUmowy"
-            [(ngModel)]="rodzajUmowy"
+            [options]="contractsType"
+            [(ngModel)]="basedParameters.contractType"
+            (onChange)="obliczKwoty()"
             placeholder="Wybierz..."
           ></p-dropdown>
         </div>
         <div class="pole-formularza">
-          <label class="parametry-formularza" for="rokPodatkowy"> Rok podatkowy: </label>
+          <label class="parametry-formularza label-required" for="taxYears"> Rok podatkowy: </label>
           <p-dropdown
-            [options]="rokPodatkowy"
-            [(ngModel)]="rok"
+            [options]="taxYears"
+            [(ngModel)]="basedParameters.taxYear"
+            (onChange)="obliczKwoty()"
             placeholder="Wybierz..."
           ></p-dropdown>
         </div>
         <div class="pole-formularza">
-          <label class="parametry-formularza" for="basedParameters.grossIncome"> Wynagrodzenie brutto: </label>
+          <label class="parametry-formularza label-required" for="basedParameters.grossIncome"> Wynagrodzenie brutto: </label>
           <p-inputNumber
             id="basedParameters.grossIncome"
             [(ngModel)]="basedParameters.grossIncome"
@@ -30,8 +35,8 @@
           ></p-inputNumber>
         </div>    
 
-        <div class="pole-formularza">
-          <label class="parametry-formularza" for="basedParameters.additionalBenefits"> Dodatkowy przychód / Benefity: </label>
+      <!-- <div class="pole-formularza">
+          <label class="parametry-formularza" for="basedParameters.additionalBenefits"> Premie / Benefity: </label>
           <p-inputNumber
             id="basedParameters.additionalBenefits"
             [(ngModel)]="basedParameters.additionalBenefits"
@@ -39,7 +44,7 @@
             mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2"
             (onBlur)="obliczKwoty()"
           ></p-inputNumber>
-        </div>    
+        </div>   --> 
         <div class="pole-formularza">
           <label class="parametry-formularza" for="accidentContributionPercent"> Stopa procentowa składki
             na ubezpieczenie wypadkowe: </label>
@@ -333,10 +338,11 @@
       </tr>
       <tr>
           <th>Koszt uzyskania przychodu</th>
-          <th>Ulga klasy średniej</th>
+          <th *ngIf="basedParameters.taxYear == 2022">Ulga klasy średniej</th>
           <th>Podstawa opodatkowania</th>
           <th>Obliczony podatek</th>
           <th>Kwota wolna od podatku</th>
+          <th *ngIf="basedParameters.taxYear == 2021">Część składki zdrowotnej do odliczenia</th>
           <th>Zaliczka na podatek</th>
       </tr>
   </ng-template>
@@ -344,10 +350,11 @@
       <tr>
           <td></td>
           <td>{{taxContributions.incomeCost}} zł</td>
-          <td>{{taxContributions.middleClassRelief}} zł</td>
+          <td *ngIf="basedParameters.taxYear == 2022">{{taxContributions.middleClassRelief}} zł</td>
           <td>{{taxContributions.baseOfTax}} zł</td>
           <td>{{taxContributions.tax}} zł</td>
           <td>{{taxContributions.taxFreeAmount}} zł</td>
+          <td *ngIf="basedParameters.taxYear == 2021">{{taxContributions.taxFreeHealthyPart}} zł</td>
           <td>{{taxContributions.advanceTax}} zł</td>
       </tr>
   </ng-template>

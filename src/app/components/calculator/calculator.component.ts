@@ -13,11 +13,13 @@ static SICKNESS_EMPLOYEE_PART : number = 2.45;
 static DISABILITY_EMPLOYEE_PART : number = 1.5;
 static DISABILITY_EMPLOYER_PART : number = 8.5;
 static HEALTHY_EMPLOYEE_PART : number = 9.0;
+static FIRST_TAX_RATE: number = 17;
+static SECOND_TAX_RATE: number = 32;
 static TOTAL_EMPLOYEE_PART : number = CalculatorComponent.DISABILITY_EMPLOYEE_PART + CalculatorComponent.PENSION_EMPLOYEE_PART + CalculatorComponent.SICKNESS_EMPLOYEE_PART;
 static TOTAL_EMPLOYER_PART : number = CalculatorComponent.DISABILITY_EMPLOYER_PART + CalculatorComponent.PENSION_EMPLOYER_PART ;
 
-rodzajeUmowy: any[];
-rokPodatkowy: any[];
+taxYears: any[];
+contractsType: any[];
 skEmerytalnaPracownik: number= 0;
 skRentowaPracownik: number= 0;
 skRentowaPracodawca: number= 0;
@@ -27,10 +29,9 @@ skWypadkowaPracodawca: number= 0;
 razemPracodawcaZUS: number =0;
 razemPracownikZUS: number= 0;
 
-rodzajUmowy: string='';
-rok: string='';
-
 contributions: any[] = [];
+
+errors: boolean = true;
 
 basedParameters = {
   accidentContributionPercent: 0.67,
@@ -44,7 +45,9 @@ basedParameters = {
   isAuthorRights: false,
   isTaxFreeAmount: false,
   isUnder26Age: false,
-  isWorkOutsideHome: false
+  isWorkOutsideHome: false,
+  contractType: '',
+  taxYear: 0
 };
 
 ppkParameters = {
@@ -68,6 +71,7 @@ taxContributions = {
   baseOfTax: 0,
   tax: 0,
   taxFreeAmount: 0, 
+  taxFreeHealthyPart: 0,
   advanceTax: 0 
 };
 
@@ -80,14 +84,15 @@ summaryParameters ={
   employerPercent: 0
 }
 
+employerContributions={
+  fgsp: 0,
+  labourFund: 0
+}
+
+
 constructor(){
-  this.rodzajeUmowy = [    
-    {label: 'Umowa o Pracę', rodzajUmowy: 'UoP'},
-    {label: 'Umowa zlecenie', rodzajUmowy: 'UZ'}];
-  this.rokPodatkowy = [
-    {label: '2021', rok: '2021'},
-    {label: '2022', rok: '2022'}
-  ];
+  this.taxYears = [2021, 2022];
+  this.contractsType = ['Umowa o Pracę'];
 
   this.contributions = [
     {
@@ -132,44 +137,57 @@ get totalEmployerPart(){
 
 
 obliczKwoty(){
-
-  this.calculateZUSContributions();
-  this.calculateHealthyContributions();
-  this.calculatePPKContributions();
-  this.calculateTaxContributions();
-  this.basedParameters.netIncome = this.dajKwoteNetto();
-  this.basedParameters.totalEmployerCosts = Math.round((this.basedParameters.grossIncome+this.razemPracodawcaZUS+this.ppkParameters.ppkEmployerAmount)*100)/100;
-  this.calculateSummaryParameters();
-  this.contributions = [
-    {
-      contribution: 'Emerytalne', 
-      employeePart: CalculatorComponent.PENSION_EMPLOYEE_PART, 
-      employeeValue: this.skEmerytalnaPracownik, 
-      employerPart: CalculatorComponent.PENSION_EMPLOYER_PART, 
-      employerValue: this.skEmerytalnaPracodawca,
-    },
-    {
-      contribution: 'Rentowe', 
-      employeePart: CalculatorComponent.DISABILITY_EMPLOYEE_PART, 
-      employeeValue: this.skRentowaPracownik, 
-      employerPart: CalculatorComponent.DISABILITY_EMPLOYER_PART, 
-      employerValue: this.skRentowaPracodawca
-    },
-    {
-      contribution: 'Chorobowe', 
-      employeePart: CalculatorComponent.SICKNESS_EMPLOYEE_PART, 
-      employeeValue: this.skChorobowaPracownik, 
-      employerPart: 0, 
-      employerValue: 0
-    },
-    {
-      contribution: 'Wypadkowe', 
-      employeePart: 0, 
-      employeeValue: 0, 
-      employerPart: this.basedParameters.accidentContributionPercent, 
-      employerValue: this.skWypadkowaPracodawca
+  if(this.checkValidation()){
+    this.calculateZUSContributions();
+    this.calculateHealthyContributions();
+    this.calculatePPKContributions();
+    if(this.basedParameters.taxYear == 2021){
+      this.calculateTaxContributions_2021();
     }
-  ];
+    else{
+      this.calculateTaxContributions_2022();
+    }
+    this.calculateEmplyerContributions();
+    this.basedParameters.netIncome = this.dajKwoteNetto();
+    this.basedParameters.totalEmployerCosts = Math.round(
+      (this.basedParameters.grossIncome+
+        this.razemPracodawcaZUS+
+        this.ppkParameters.ppkEmployerAmount+
+        this.employerContributions.fgsp+
+        this.employerContributions.labourFund
+        )*100)/100;
+    this.calculateSummaryParameters();
+    this.contributions = [
+      {
+        contribution: 'Emerytalne', 
+        employeePart: CalculatorComponent.PENSION_EMPLOYEE_PART, 
+        employeeValue: this.skEmerytalnaPracownik, 
+        employerPart: CalculatorComponent.PENSION_EMPLOYER_PART, 
+        employerValue: this.skEmerytalnaPracodawca,
+      },
+      {
+        contribution: 'Rentowe', 
+        employeePart: CalculatorComponent.DISABILITY_EMPLOYEE_PART, 
+        employeeValue: this.skRentowaPracownik, 
+        employerPart: CalculatorComponent.DISABILITY_EMPLOYER_PART, 
+        employerValue: this.skRentowaPracodawca
+      },
+      {
+        contribution: 'Chorobowe', 
+        employeePart: CalculatorComponent.SICKNESS_EMPLOYEE_PART, 
+        employeeValue: this.skChorobowaPracownik, 
+        employerPart: 0, 
+        employerValue: 0
+      },
+      {
+        contribution: 'Wypadkowe', 
+        employeePart: 0, 
+        employeeValue: 0, 
+        employerPart: this.basedParameters.accidentContributionPercent, 
+        employerValue: this.skWypadkowaPracodawca
+      }
+    ];
+  } 
 
   }
 
@@ -181,13 +199,32 @@ dajKwoteNetto(): number {
                 -this.taxContributions.advanceTax;
     return Math.round(kwota*100)/100; 
   }
+
 dajKwoteWolnaOdPodatku(): number {
-  if(!(this.basedParameters.grossIncome > 0) || !this.basedParameters.isTaxFreeAmount){
-    return 0;
+  switch(this.basedParameters.taxYear){
+    case 2021: 
+    {
+      if(!(this.basedParameters.grossIncome > 0) || !this.basedParameters.isTaxFreeAmount){
+        return 0;
+      }
+      else{
+        return 43.76;
+      }
+    }
+    case 2022:
+    {
+      if(!(this.basedParameters.grossIncome > 0) || !this.basedParameters.isTaxFreeAmount){
+        return 0;
+      }
+      else{
+        return 425;
+      }
+    }
+    default:
+      return 0;
+    
   }
-  else{
-    return 425;
-  }
+
 }
 
 dajKwoteKosztow(): number {
@@ -275,12 +312,13 @@ private calculateZUSContributions(){
                         + this.skChorobowaPracownik)*100)/100;
 }
 
-private calculateTaxContributions(){
+private calculateTaxContributions_2022(){
   this.taxContributions.taxFreeAmount = this.dajKwoteWolnaOdPodatku();
   this.taxContributions.incomeCost = this.dajKwoteKosztow();
   this.taxContributions.middleClassRelief = this.obliczUlgeKlasySredniej(this.basedParameters.grossIncome, this.basedParameters.isPPK);
   this.taxContributions.baseOfTax = this.obliczPodstaweOpodatkowania();
-  this.taxContributions.tax = Math.round(this.taxContributions.baseOfTax*0.17);
+  this.taxContributions.tax = Math.round(this.taxContributions.baseOfTax*CalculatorComponent.FIRST_TAX_RATE/100);
+  this.taxContributions.taxFreeHealthyPart= 0;
   this.taxContributions.advanceTax = Math.round((this.taxContributions.tax - this.taxContributions.taxFreeAmount)*100)/100;
   if(this.basedParameters.isUnder26Age){
     this.taxContributions.advanceTax = 0.00;
@@ -290,8 +328,25 @@ private calculateTaxContributions(){
   }
 }
 
+private calculateTaxContributions_2021(){
+  this.taxContributions.taxFreeAmount = this.dajKwoteWolnaOdPodatku();
+  this.taxContributions.incomeCost = this.dajKwoteKosztow();
+  this.taxContributions.middleClassRelief= 0;
+  this.taxContributions.baseOfTax = this.obliczPodstaweOpodatkowania();
+  this.taxContributions.tax = Math.round(this.taxContributions.baseOfTax*CalculatorComponent.FIRST_TAX_RATE/100);
+  this.taxContributions.taxFreeHealthyPart= Math.round(this.healthyContributions.baseOfHealthyContribution*0.0775*100)/100;
+  this.taxContributions.advanceTax = Math.round((this.taxContributions.tax - this.taxContributions.taxFreeAmount - this.taxContributions.taxFreeHealthyPart));
+  if(this.basedParameters.isUnder26Age){
+    this.taxContributions.advanceTax = 0.00;
+  }
+  if(this.taxContributions.advanceTax < 0){
+    this.taxContributions.advanceTax = 0;
+  }
+}
+
+
 private calculateSummaryParameters(){
-  if(this.basedParameters.grossIncome>0){
+  if(this.basedParameters.grossIncome > 0){
     this.summaryParameters.netIncomePercent = Math.round((this.basedParameters.netIncome/this.basedParameters.grossIncome)*10000)/100;
     this.summaryParameters.zusPercent = Math.round((this.razemPracownikZUS/this.basedParameters.grossIncome)*10000)/100;
     this.summaryParameters.nfzPercent = Math.round((this.healthyContributions.employeeValue/this.basedParameters.grossIncome)*10000)/100;
@@ -300,6 +355,26 @@ private calculateSummaryParameters(){
     this.summaryParameters.employerPercent = Math.round((this.basedParameters.totalEmployerCosts/this.basedParameters.grossIncome)*10000)/100;
   }
 }
+
+private calculateEmplyerContributions(){
+  if(this.basedParameters.grossIncome > 0){
+    this.employerContributions.fgsp = Math.round(this.basedParameters.grossIncome*0.001*100)/100;
+    this.employerContributions.labourFund = Math.round(this.basedParameters.grossIncome*0.0245*100)/100;
+  }
+}
+
+private checkValidation() : boolean{
+  console.log(this.basedParameters.grossIncome);
+  if(!(this.basedParameters.taxYear > 0 ) 
+    || this.basedParameters.contractType === ''
+    || this.basedParameters.grossIncome == null){
+    this.errors=true;
+    return false;
+  }
+   this.errors=false;
+   return true;
+}
+
 
 }
 
