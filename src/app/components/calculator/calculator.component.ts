@@ -31,6 +31,21 @@ razemPracownikZUS: number= 0;
 
 contributions: any[] = [];
 
+months: any[] = [
+"Styczeń",
+"Luty",
+"Marzec",
+"Kwiecień",
+"Maj",
+"Czerwiec",
+"Lipiec",
+"Sierpień",
+"Wrzesień",
+"Październik",
+"Listopad",
+"Grudzień"
+];
+
 errors: boolean = true;
 
 basedParameters = {
@@ -375,6 +390,9 @@ private checkValidation() : boolean{
    return true;
 }
 
+dajRocznaKwoteSkladki(skladka :number){
+  return Math.round(12*skladka*100)/100;
+}
 
 }
 
