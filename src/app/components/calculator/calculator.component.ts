@@ -15,6 +15,7 @@ static DISABILITY_EMPLOYER_PART : number = 8.5;
 static HEALTHY_EMPLOYEE_PART : number = 9.0;
 static FIRST_TAX_RATE: number = 17;
 static SECOND_TAX_RATE: number = 32;
+static MAX_BASE_PENSION_PART : number = 177660;
 static TOTAL_EMPLOYEE_PART : number = CalculatorComponent.DISABILITY_EMPLOYEE_PART + CalculatorComponent.PENSION_EMPLOYEE_PART + CalculatorComponent.SICKNESS_EMPLOYEE_PART;
 static TOTAL_EMPLOYER_PART : number = CalculatorComponent.DISABILITY_EMPLOYER_PART + CalculatorComponent.PENSION_EMPLOYER_PART ;
 
@@ -30,21 +31,6 @@ razemPracodawcaZUS: number =0;
 razemPracownikZUS: number= 0;
 
 contributions: any[] = [];
-
-months: any[] = [
-"Styczeń",
-"Luty",
-"Marzec",
-"Kwiecień",
-"Maj",
-"Czerwiec",
-"Lipiec",
-"Sierpień",
-"Wrzesień",
-"Październik",
-"Listopad",
-"Grudzień"
-];
 
 errors: boolean = true;
 
@@ -104,10 +90,85 @@ employerContributions={
   labourFund: 0
 }
 
+months: any[] = [
+  {
+    month_number: 1,
+    month_string: "Styczeń",
+    pension_part: this.getMonthlyPensionPart(1),
+    disability_part:  this.getMonthlyDisabilityPart(1)
+  },
+  {
+    month_number: 2,
+    month_string: "Luty",
+    pension_part: this.getMonthlyPensionPart(2),
+    disability_part: this.getMonthlyDisabilityPart(2)
+  },
+  {
+    month_number: 3,
+    month_string: "Marzec",
+    pension_part: this.getMonthlyPensionPart(3),
+    disability_part: this.getMonthlyDisabilityPart(3)
+  },
+  {
+    month_number: 4,
+    month_string: "Kwiecień",
+    pension_part: this.getMonthlyPensionPart(4),
+    disability_part: this.getMonthlyDisabilityPart(4)
+  },
+  {
+    month_number: 5,
+    month_string: "Maj",
+    pension_part: this.getMonthlyPensionPart(5),
+    disability_part: this.getMonthlyDisabilityPart(5)
+  },
+  {
+    month_number: 6,
+    month_string: "Czerwiec",
+    pension_part: this.getMonthlyPensionPart(6),
+    disability_part: this.getMonthlyDisabilityPart(6)
+  },
+  {
+    month_number: 7,
+    month_string: "Lipiec",
+    pension_part: this.getMonthlyPensionPart(7),
+    disability_part: this.getMonthlyDisabilityPart(7)
+  },
+  {
+    month_number: 8,
+    month_string: "Sierpień",
+    pension_part: this.getMonthlyPensionPart(8),
+    disability_part: this.getMonthlyDisabilityPart(8)
+  },
+  {
+    month_number: 9,
+    month_string: "Wrzesień",
+    pension_part: this.getMonthlyPensionPart(9),
+    disability_part: this.getMonthlyDisabilityPart(9)
+  },
+  {
+    month_number: 10,
+    month_string: "Październik",
+    pension_part: this.getMonthlyPensionPart(10),
+    disability_part: this.getMonthlyDisabilityPart(10)
+  },
+  {
+    month_number: 11,
+    month_string: "Listopad",
+    pension_part: this.getMonthlyPensionPart(11),
+    disability_part: this.getMonthlyDisabilityPart(11)
+  },
+  {
+    month_number: 12,
+    month_string: "Grudzień",
+    pension_part: this.getMonthlyPensionPart(12),
+    disability_part: this.getMonthlyDisabilityPart(12)
+  }
+];
+
 
 constructor(){
   this.taxYears = [2021, 2022];
-  this.contractsType = ['Umowa o Pracę'];
+  this.contractsType = ['Umowa o Pracę', 'Działalnośc Gospodarcza'];
 
   this.contributions = [
     {
@@ -200,6 +261,80 @@ obliczKwoty(){
         employeeValue: 0, 
         employerPart: this.basedParameters.accidentContributionPercent, 
         employerValue: this.skWypadkowaPracodawca
+      }
+    ];
+    this.months = [
+      {
+        month_number: 1,
+        month_string: "Styczeń",
+        pension_part: this.getMonthlyPensionPart(1),
+        disability_part:  this.getMonthlyDisabilityPart(1)
+      },
+      {
+        month_number: 2,
+        month_string: "Luty",
+        pension_part: this.getMonthlyPensionPart(2),
+        disability_part: this.getMonthlyDisabilityPart(2)
+      },
+      {
+        month_number: 3,
+        month_string: "Marzec",
+        pension_part: this.getMonthlyPensionPart(3),
+        disability_part: this.getMonthlyDisabilityPart(3)
+      },
+      {
+        month_number: 4,
+        month_string: "Kwiecień",
+        pension_part: this.getMonthlyPensionPart(4),
+        disability_part: this.getMonthlyDisabilityPart(4)
+      },
+      {
+        month_number: 5,
+        month_string: "Maj",
+        pension_part: this.getMonthlyPensionPart(5),
+        disability_part: this.getMonthlyDisabilityPart(5)
+      },
+      {
+        month_number: 6,
+        month_string: "Czerwiec",
+        pension_part: this.getMonthlyPensionPart(6),
+        disability_part: this.getMonthlyDisabilityPart(6)
+      },
+      {
+        month_number: 7,
+        month_string: "Lipiec",
+        pension_part: this.getMonthlyPensionPart(7),
+        disability_part: this.getMonthlyDisabilityPart(7)
+      },
+      {
+        month_number: 8,
+        month_string: "Sierpień",
+        pension_part: this.getMonthlyPensionPart(8),
+        disability_part: this.getMonthlyDisabilityPart(8)
+      },
+      {
+        month_number: 9,
+        month_string: "Wrzesień",
+        pension_part: this.getMonthlyPensionPart(9),
+        disability_part: this.getMonthlyDisabilityPart(9)
+      },
+      {
+        month_number: 10,
+        month_string: "Październik",
+        pension_part: this.getMonthlyPensionPart(10),
+        disability_part: this.getMonthlyDisabilityPart(10)
+      },
+      {
+        month_number: 11,
+        month_string: "Listopad",
+        pension_part: this.getMonthlyPensionPart(11),
+        disability_part: this.getMonthlyDisabilityPart(11)
+      },
+      {
+        month_number: 12,
+        month_string: "Grudzień",
+        pension_part: this.getMonthlyPensionPart(12),
+        disability_part: this.getMonthlyDisabilityPart(12)
       }
     ];
   } 
@@ -379,7 +514,6 @@ private calculateEmplyerContributions(){
 }
 
 private checkValidation() : boolean{
-  console.log(this.basedParameters.grossIncome);
   if(!(this.basedParameters.taxYear > 0 ) 
     || this.basedParameters.contractType === ''
     || this.basedParameters.grossIncome == null){
@@ -392,6 +526,61 @@ private checkValidation() : boolean{
 
 dajRocznaKwoteSkladki(skladka :number){
   return Math.round(12*skladka*100)/100;
+}
+
+getPensionYearsPart(){
+  var kwota :number = 0; 
+  if(this.checkValidation()){
+    this.months.forEach(element => {
+      kwota += element.pension_part;
+    });
+  }
+  return Math.round(kwota*100)/100;
+}
+
+getDisabilityYearsPart(){
+  var kwota :number = 0; 
+  if(this.checkValidation()){
+    this.months.forEach(element => {
+      kwota += element.disability_part;
+    });
+  }
+  return Math.round(kwota*100)/100;
+}
+
+
+getMonthlyPensionPart(month_number: number){
+  if(this.basedParameters.grossIncome>0){
+    if(month_number*this.basedParameters.grossIncome<CalculatorComponent.MAX_BASE_PENSION_PART){
+      return this.skEmerytalnaPracownik;
+    }
+    else{
+      if(month_number*this.basedParameters.grossIncome-CalculatorComponent.MAX_BASE_PENSION_PART<this.basedParameters.grossIncome){
+        return Math.round(CalculatorComponent.PENSION_EMPLOYEE_PART*(month_number*this.basedParameters.grossIncome-CalculatorComponent.MAX_BASE_PENSION_PART))/100;
+      }
+      else{
+        return 0;
+      }
+    }
+  }
+  return 0;
+}
+
+getMonthlyDisabilityPart(month_number: number){
+  if(this.basedParameters.grossIncome>0){
+    if(month_number*this.basedParameters.grossIncome<CalculatorComponent.MAX_BASE_PENSION_PART){
+      return this.skRentowaPracownik;
+    }
+    else{
+      if(month_number*this.basedParameters.grossIncome-CalculatorComponent.MAX_BASE_PENSION_PART<this.basedParameters.grossIncome){
+        return Math.round(CalculatorComponent.DISABILITY_EMPLOYEE_PART*(month_number*this.basedParameters.grossIncome-CalculatorComponent.MAX_BASE_PENSION_PART))/100;
+      }
+      else{
+        return 0;
+      }
+    }
+  }
+  return 0;
 }
 
 }

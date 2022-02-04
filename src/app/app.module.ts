@@ -16,11 +16,15 @@ import { TableModule} from 'primeng/table';
 import { SplitterModule} from 'primeng/splitter';
 import { CardModule} from 'primeng/card';
 import { TabViewModule} from 'primeng/tabview';
+import { UmowaOPraceComponent } from './components/calculator/umowa-oprace/umowa-oprace.component';
+import { DzialanoscComponent } from './components/calculator/dzialanosc/dzialanosc.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    CalculatorComponent
+    CalculatorComponent,
+    UmowaOPraceComponent,
+    DzialanoscComponent
   ],
   imports: [
     BrowserModule,
