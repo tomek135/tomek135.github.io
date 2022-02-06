@@ -18,6 +18,7 @@ import { CardModule} from 'primeng/card';
 import { TabViewModule} from 'primeng/tabview';
 import { UmowaOPraceComponent } from './components/calculator/umowa-oprace/umowa-oprace.component';
 import { DzialanoscComponent } from './components/calculator/dzialanosc/dzialanosc.component';
+import { RadioButtonModule} from 'primeng/radiobutton';
 
 @NgModule({
   declarations: [
@@ -40,6 +41,7 @@ import { DzialanoscComponent } from './components/calculator/dzialanosc/dzialano
     TabViewModule,
     DropdownModule,
     ReactiveFormsModule,
+    RadioButtonModule,
     CardModule,
     AppRoutingModule
   ],

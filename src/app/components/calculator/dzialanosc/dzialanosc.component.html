@@ -9,6 +9,29 @@
 
     <div class="pole-formularza">
         <label class="parametry-formularza label-required"> Forma opodatkowania: </label>
+        <p-dropdown
+        [options]="taxType"
+        [(ngModel)]="tax"
+        placeholder="Wybierz..."
+      ></p-dropdown>
+      <p-dropdown *ngIf="tax=='Ryczałt'"
+      [options]="ryczalt"
+      placeholder="Stawka ryczałtu"
+    ></p-dropdown>
     </div> 
+
+    <div class="pole-formularza">
+        <label class="parametry-formularza label"> Koszty: </label>
+    </div>
+
+    <div class="pole-formularza">
+        <label class="parametry-formularza label-required"> Składki ZUS: </label>
+        <div *ngFor="let skladka of skladkiZUS" class="field-checkbox">
+            <p style="margin-left: 30px;">
+                <p-radioButton [inputId]="skladka.id" name="skladka" [value]="skladka" [(ngModel)]="selectedCategory" ></p-radioButton>
+                <label style="padding-left: 5px;" [for]="skladka.id">{{skladka.value}} </label>
+            </p>
+        </div>
+    </div>
        
 </div>
