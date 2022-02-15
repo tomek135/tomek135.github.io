@@ -19,13 +19,17 @@ import { TabViewModule} from 'primeng/tabview';
 import { UmowaOPraceComponent } from './components/calculator/umowa-oprace/umowa-oprace.component';
 import { DzialanoscComponent } from './components/calculator/dzialanosc/dzialanosc.component';
 import { RadioButtonModule} from 'primeng/radiobutton';
+import { UopSummaryComponent } from './components/calculator/umowa-oprace/uop-summary/uop-summary.component';
+import { DzialalnoscSummaryComponent } from './components/calculator/dzialanosc/dzialalnosc-summary/dzialalnosc-summary.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CalculatorComponent,
     UmowaOPraceComponent,
-    DzialanoscComponent
+    DzialanoscComponent,
+    UopSummaryComponent,
+    DzialalnoscSummaryComponent
   ],
   imports: [
     BrowserModule,

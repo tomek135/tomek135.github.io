@@ -1,4 +1,5 @@
 import { Component} from '@angular/core';
+import { UmowaOPraceComponent } from '../calculator/umowa-oprace/umowa-oprace.component'
 
 @Component({
   selector: 'app-calculator',
@@ -582,6 +583,8 @@ getMonthlyDisabilityPart(month_number: number){
   }
   return 0;
 }
+
+
 
 }
 

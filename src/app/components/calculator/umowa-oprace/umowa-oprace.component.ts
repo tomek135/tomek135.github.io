@@ -7,18 +7,7 @@ import { CalculatorComponent } from '../calculator.component';
   styleUrls: ['./umowa-oprace.component.css']
 })
 export class UmowaOPraceComponent {
-  static PENSION_EMPLOYEE_PART : number = 9.76;
-  static PENSION_EMPLOYER_PART : number = 9.76;
-  static SICKNESS_EMPLOYEE_PART : number = 2.45;
-  static DISABILITY_EMPLOYEE_PART : number = 1.5;
-  static DISABILITY_EMPLOYER_PART : number = 8.5;
-  static HEALTHY_EMPLOYEE_PART : number = 9.0;
-  static FIRST_TAX_RATE: number = 17;
-  static SECOND_TAX_RATE: number = 32;
-  static MAX_BASE_PENSION_PART : number = 177660;
-  static TOTAL_EMPLOYEE_PART : number = CalculatorComponent.DISABILITY_EMPLOYEE_PART + CalculatorComponent.PENSION_EMPLOYEE_PART + CalculatorComponent.SICKNESS_EMPLOYEE_PART;
-  static TOTAL_EMPLOYER_PART : number = CalculatorComponent.DISABILITY_EMPLOYER_PART + CalculatorComponent.PENSION_EMPLOYER_PART ;
-  
+ 
   taxYears: any[];
   contractsType: any[];
   skEmerytalnaPracownik: number= 0;

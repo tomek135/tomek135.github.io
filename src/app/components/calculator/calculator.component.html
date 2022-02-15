@@ -35,89 +35,18 @@
     </div>
     <div class="col"  [style]="{'padding-top': '1em'}">
       <p-card header="Podsumowanie" [style]="{'width': '35rem', 'margin-bottom': '2em'}">
-        <div class="form-group row">
-          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Kwota brutto: </label>
-          <div class="col-sm-4">
-            <input type="text" disabled 
-            [(ngModel)]="basedParameters.grossIncome"
-            class="form-control form-control-sm" id="colFormLabelSm">
-          </div>
+          <div *ngIf="basedParameters.contractType=='Umowa o Pracę'">
+            <app-uop-summary></app-uop-summary>
         </div>
-        <hr class="style1">
-        <div class="form-group row">
-          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">ZUS: </label>
-          <div class="col-sm-4">
-            <input type="text" disabled 
-            [(ngModel)]="razemPracownikZUS"
-            class="form-control form-control-sm" id="colFormLabelSm" >
-          </div>
-          <div class="col-sm-2 col-form-label col-form-label-sm">
-            <label>{{summaryParameters.zusPercent}} %</label>
-          </div>
-        </div>
-        <div class="form-group row">
-          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">NFZ: </label>
-          <div class="col-sm-4">
-            <input type="text" disabled 
-            [(ngModel)]="healthyContributions.employeeValue"
-            class="form-control form-control-sm" id="colFormLabelSm">
-          </div>
-          <div class="col-sm-2 col-form-label col-form-label-sm">
-            <label>{{summaryParameters.nfzPercent}} %</label>
-          </div>
-        </div>
-        <div class="form-group row" *ngIf="basedParameters.isPPK">
-          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">PPK: </label>
-          <div class="col-sm-4">
-            <input type="text" disabled 
-            [(ngModel)]="ppkParameters.ppkEmployeeAmount"
-            class="form-control form-control-sm" id="colFormLabelSm">
-          </div>
-          <div class="col-sm-2 col-form-label col-form-label-sm">
-            <label>{{summaryParameters.ppkPercent}} %</label>
-          </div>
-        </div>
-        <div class="form-group row">
-          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Podatek: </label>
-          <div class="col-sm-4">
-            <input type="text" disabled 
-            [(ngModel)]="taxContributions.advanceTax"
-            class="form-control form-control-sm" id="colFormLabelSm">
-          </div>
-          <div class="col-sm-2 col-form-label col-form-label-sm">
-            <label>{{summaryParameters.taxPercent}} %</label>
-          </div>
-        </div>
-          <hr class="style1">
-        <div class="form-group row">
-          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Kwota netto: </label>
-          <div class="col-sm-4">
-            <input type="text" disabled 
-            [(ngModel)]="basedParameters.netIncome"
-            class="form-control form-control-sm" id="colFormLabelSm">
-          </div>
-          <div class="col-sm-2 col-form-label col-form-label-sm">
-            <label>{{summaryParameters.netIncomePercent}} %</label>
-          </div>
-        </div>
-        <hr class="style1">
-        <div class="form-group row">
-          <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Koszt pracodawcy: </label>
-          <div class="col-sm-4">
-            <input type="text" disabled 
-            [(ngModel)]="basedParameters.totalEmployerCosts"
-            class="form-control form-control-sm" id="colFormLabelSm">
-          </div>
-          <div class="col-sm-2 col-form-label col-form-label-sm">
-            <label>{{summaryParameters.employerPercent}} %</label>
-          </div>
+        <div *ngIf="basedParameters.contractType=='Działalnośc Gospodarcza'">
+          <app-dzialalnosc-summary></app-dzialalnosc-summary>
         </div>
     </p-card>
     </div>
   </div>
 <br/>
 <div>
-  <p-tabView>
+  <p-tabView *ngIf="basedParameters.contractType=='Umowa o Pracę'">
       <p-tabPanel header="Miesięczne koszty">
         <p-table [value]="contributions" responsiveLayout="scroll">
           <ng-template pTemplate="header">
