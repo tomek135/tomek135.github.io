@@ -1,37 +1,176 @@
-<div>
-    <div class="pole-formularza">
-        <label class="parametry-formularza label-required"> Kwota netto na fakturze: </label>
-        <p-inputNumber
-        placeholder="Podaj kwotę w zł"
-        mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2"
-        ></p-inputNumber>
-    </div>  
-
-    <div class="pole-formularza">
-        <label class="parametry-formularza label-required"> Forma opodatkowania: </label>
-        <p-dropdown
-        [options]="taxType"
-        [(ngModel)]="tax"
-        placeholder="Wybierz..."
-      ></p-dropdown>
-      <p-dropdown *ngIf="tax=='Ryczałt'"
-      [options]="ryczalt"
-      placeholder="Stawka ryczałtu"
-    ></p-dropdown>
-    </div> 
-
-    <div class="pole-formularza">
-        <label class="parametry-formularza label"> Koszty: </label>
-    </div>
-
-    <div class="pole-formularza">
-        <label class="parametry-formularza label-required"> Składki ZUS: </label>
-        <div *ngFor="let skladka of skladkiZUS" class="field-checkbox">
-            <p style="margin-left: 30px;">
-                <p-radioButton [inputId]="skladka.id" name="skladka" [value]="skladka" [(ngModel)]="selectedCategory" ></p-radioButton>
-                <label style="padding-left: 5px;" [for]="skladka.id">{{skladka.value}} </label>
-            </p>
+<div class="container">
+  <div class="row">
+    <div class="col" [style]="{'padding-top': '1em'}">
+      <p-card header="Działalność gospodarcza" [style]="{'margin-bottom': '2em'}">
+        <div class="alert alert-danger" role="alert" *ngIf="errors">
+          Uzupełnij obowiązkowe pola oznaczone * aby otrzymać wynik.
         </div>
+        <div class="pole-formularza">
+          <label class="parametry-formularza label-required" for="taxYears"> Rok podatkowy: </label>
+          <p-dropdown
+            [options]="taxYears"
+            optionLabel="year"
+            [(ngModel)]="selectedYear"
+            (onChange)="obliczKwoty()"
+            placeholder="Wybierz..."
+          ></p-dropdown>
+        </div>
+      <br>
+        <div class="pole-formularza">
+          <label class="parametry-formularza label-required"> Kwota netto na fakturze: </label>
+          <p-inputNumber
+          [(ngModel)]="basedParameters.grossIncome"
+          (onChange)="obliczKwoty()"
+          placeholder="Podaj kwotę w zł"
+          mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2"
+          ></p-inputNumber>
+        </div>  
+      <br>
+        <div class="pole-formularza">
+          <label class="parametry-formularza label-required"> Forma opodatkowania: </label>
+            <p-dropdown
+            [options]= "taxType"
+            optionLabel="value"
+            [(ngModel)]="tax"
+            (onChange)="obliczKwoty()"
+            placeholder="Wybierz..."
+          ></p-dropdown>
+          <p-dropdown *ngIf="tax?.value=='Ryczałt'"
+          [options]="ryczalt"
+          [(ngModel)]="ryczaltValue"
+          placeholder="Stawka ryczałtu"
+          ></p-dropdown>
+        </div> 
+
+        <div class="pole-formularza">
+          <label class="parametry-formularza label"> Koszty: </label>
+          <p-inputNumber
+          placeholder="Podaj kwotę w zł"
+          mode="decimal" [minFractionDigits]="2" [maxFractionDigits]="2"
+          ></p-inputNumber>
+        </div>
+      <br>
+        <div class="pole-formularza">
+          <label class="parametry-formularza label-required"> Składki ZUS: </label>
+          <div *ngFor="let skladka of skladkiZUS" class="field-checkbox">
+              <p style="margin-left: 30px;">
+                  <p-radioButton [inputId]="skladka.id" name="skladka" [value]="skladka" (onClick)="obliczKwoty()" [(ngModel)]="selectedCategory" ></p-radioButton>
+                  <label style="padding-left: 5px;" [for]="skladka.id">{{skladka.value}} </label>
+              </p>
+          </div>
+        </div>
+      </p-card>
     </div>
-       
+    <!--<div *ngIf="basedParameters.contractType!==''" class="col"  [style]="{'padding-top': '1em'}">
+      <p-card header="Podsumowanie" [style]="{'width': '35rem', 'margin-bottom': '2em'}">
+          <app-dzialalnosc-summary></app-dzialalnosc-summary>
+      </p-card>
+    </div>-->
+    <div>
+      <p-tabView *ngIf="basedParameters.contractType=='Działalnośc Gospodarcza'">
+        <p-tabPanel header="Rozliczenie miesięczne">
+          <p-table [value]="contributions" responsiveLayout="scroll">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th>Składki ZUS</th>
+                    <th>Wysokość składki w %</th>
+                    <th>Podstawa do naliczenia </th>
+                    <th>Kwota</th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-contribution>
+                <tr>
+                    <td>{{contribution.contribution}}</td>
+                    <td>{{contribution.valueInPercent}} %</td>
+                    <td>{{contribution.podstawaWymiaru}} zł</td>
+                    <td>{{contribution.valueInZl}} zł</td>
+                </tr>
+              </ng-template>
+            <ng-template pTemplate="footer">
+                <tr>
+                  <td>Zdrowotne</td>
+                  <td>{{healthyContributions.valueInPercent}} %</td>
+                  <td>{{healthyContributions.baseOfHealthyContribution}} zł</td>
+                  <td>{{healthyContributions.valueInZl}} zł</td>
+                </tr>
+                <tr>
+                  <td>Suma ZUS</td>
+                  <td>{{totalB2BPart}} %</td>
+                  <td>{{taxContributions.baseOfTax}} zł</td>
+                  <td>{{taxContributions.tax}} zł</td>
+                </tr>
+                <tr>
+                  <td>Podatek</td>
+                  <td>{{taxContributions.incomeCost}} %</td>
+                  <td>{{taxContributions.baseOfTax}} zł</td>
+                  <td>{{taxContributions.tax}} zł</td>
+                </tr>
+                <tr>
+                  <td class="text-right">Razem</td>
+                  <td></td>
+                  <td></td>
+                  <td>{{razemDzialanoscZUS}} zł</td>
+                </tr>
+            </ng-template>
+        </p-table>
+        <br>
+        </p-tabPanel>
+        <p-tabPanel header="Porównanie z innymi formami opodatkowania">
+          <p-table [value]="contributions" responsiveLayout="scroll">
+            <ng-template pTemplate="header">
+                <tr>
+                    <th colspan="3" class="text-center">Forma opodatkowania:</th>
+                    <th>Skala podatkowa</th>
+                    <th>Podatek liniowy</th>
+                    <th>Ryczałt {{this.ryczaltValue}} </th>
+                </tr>
+                <tr>
+                    <th>Składki ZUS</th>
+                    <th>Wysokość składki w %</th>
+                    <th>Podstawa do naliczenia </th>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-contribution>
+                <tr>
+                    <td>{{contribution.contribution}}</td>
+                    <td>{{contribution.employeePart}} %</td>
+                    <td>{{contribution.employeeValue}} zł</td>
+                    <td>{{contribution.employerPart}} %</td>
+                </tr>
+            </ng-template>
+            <ng-template pTemplate="footer">
+                <tr>
+                    <td class="text-right">Razem</td>
+                    <td>{{razemDzialanoscZUS}} zł</td>
+                </tr>
+            </ng-template>
+        </p-table>
+        <br>
+        <p-table responsiveLayout="scroll">
+          <ng-template pTemplate="header">
+              <tr>
+                <th>Forma opodatkowania:</th>
+                <th>Skala podatkowa</th>
+                <th>Podatek liniowy</th>
+                <th>Ryczałt {{this.ryczaltValue}} </th>
+            </tr>
+          </ng-template>
+          <ng-template pTemplate="footer">
+              <tr>
+                  <td>Podatek</td>
+                  <td>{{taxContributions.incomeCost}} zł</td>
+                  <td>{{taxContributions.baseOfTax}} zł</td>
+                  <td>{{taxContributions.tax}} zł</td>
+              </tr>
+          </ng-template>
+        </p-table>
+        </p-tabPanel>
+    </p-tabView>
+    </div>
+  </div>
 </div>
+  
+

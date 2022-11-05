@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { CalculatorComponent } from '../calculator.component';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'app-umowa-oprace',
@@ -7,7 +6,19 @@ import { CalculatorComponent } from '../calculator.component';
   styleUrls: ['./umowa-oprace.component.css']
 })
 export class UmowaOPraceComponent {
- 
+
+  static PENSION_EMPLOYEE_PART : number = 9.76;
+  static PENSION_EMPLOYER_PART : number = 9.76;
+  static SICKNESS_EMPLOYEE_PART : number = 2.45;
+  static DISABILITY_EMPLOYEE_PART : number = 1.5;
+  static DISABILITY_EMPLOYER_PART : number = 6.5;
+  static HEALTHY_EMPLOYEE_PART : number = 9.0;
+  static FIRST_TAX_RATE_2021: number = 17;
+  static FIRST_TAX_RATE_2022: number = 12;
+  static SECOND_TAX_RATE: number = 32;
+  static MAX_BASE_PENSION_PART : number = 177660;
+  static TOTAL_EMPLOYEE_PART : number = UmowaOPraceComponent.DISABILITY_EMPLOYEE_PART + UmowaOPraceComponent.PENSION_EMPLOYEE_PART + UmowaOPraceComponent.SICKNESS_EMPLOYEE_PART;
+  static TOTAL_EMPLOYER_PART : number = UmowaOPraceComponent.DISABILITY_EMPLOYER_PART + UmowaOPraceComponent.PENSION_EMPLOYER_PART ;
   taxYears: any[];
   contractsType: any[];
   skEmerytalnaPracownik: number= 0;
@@ -36,6 +47,7 @@ export class UmowaOPraceComponent {
     isTaxFreeAmount: false,
     isUnder26Age: false,
     isWorkOutsideHome: false,
+    isNowyLad: false,
     contractType: '',
     taxYear: 0
   };
@@ -51,7 +63,7 @@ export class UmowaOPraceComponent {
   
   healthyContributions = {
     baseOfHealthyContribution: 0,
-    employeePart: CalculatorComponent.HEALTHY_EMPLOYEE_PART, 
+    employeePart: UmowaOPraceComponent.HEALTHY_EMPLOYEE_PART, 
     employeeValue: 0
   };
   
@@ -156,27 +168,27 @@ export class UmowaOPraceComponent {
   
   
   constructor(){
-    this.taxYears = [2021, 2022];
+    this.taxYears = [2021, 2022, 2023];
     this.contractsType = ['Umowa o Pracę', 'Działalnośc Gospodarcza'];
-  
+    this.basedParameters.contractType = 'Umowa o Pracę';
     this.contributions = [
       {
         contribution: 'Emerytalne', 
-        employeePart: CalculatorComponent.PENSION_EMPLOYEE_PART, 
+        employeePart: UmowaOPraceComponent.PENSION_EMPLOYEE_PART, 
         employeeValue: this.skEmerytalnaPracownik, 
-        employerPart: CalculatorComponent.PENSION_EMPLOYER_PART, 
+        employerPart: UmowaOPraceComponent.PENSION_EMPLOYER_PART, 
         employerValue: this.skEmerytalnaPracodawca,
       },
       {
         contribution: 'Rentowe', 
-        employeePart: CalculatorComponent.DISABILITY_EMPLOYEE_PART, 
+        employeePart: UmowaOPraceComponent.DISABILITY_EMPLOYEE_PART, 
         employeeValue: this.skRentowaPracownik, 
-        employerPart: CalculatorComponent.DISABILITY_EMPLOYER_PART, 
+        employerPart: UmowaOPraceComponent.DISABILITY_EMPLOYER_PART, 
         employerValue: this.skRentowaPracodawca
       },
       {
         contribution: 'Chorobowe', 
-        employeePart: CalculatorComponent.SICKNESS_EMPLOYEE_PART, 
+        employeePart: UmowaOPraceComponent.SICKNESS_EMPLOYEE_PART, 
         employeeValue: this.skChorobowaPracownik, 
         employerPart: 0, 
         employerValue: 0
@@ -193,11 +205,11 @@ export class UmowaOPraceComponent {
   }
   
   get totalEmployeePart(){
-    return CalculatorComponent.TOTAL_EMPLOYEE_PART;
+    return UmowaOPraceComponent.TOTAL_EMPLOYEE_PART;
   }
   
   get totalEmployerPart(){
-    return Math.round((CalculatorComponent.TOTAL_EMPLOYER_PART+this.basedParameters.accidentContributionPercent)*100)/100;
+    return Math.round((UmowaOPraceComponent.TOTAL_EMPLOYER_PART+this.basedParameters.accidentContributionPercent)*100)/100;
   }
   
   
@@ -209,8 +221,11 @@ export class UmowaOPraceComponent {
       if(this.basedParameters.taxYear == 2021){
         this.calculateTaxContributions_2021();
       }
-      else{
+      else if(this.basedParameters.taxYear == 2022 && this.basedParameters.isNowyLad) {
         this.calculateTaxContributions_2022();
+      }
+      else{
+        this.calculateTaxContributions_2023();
       }
       this.calculateEmplyerContributions();
       this.basedParameters.netIncome = this.dajKwoteNetto();
@@ -225,21 +240,21 @@ export class UmowaOPraceComponent {
       this.contributions = [
         {
           contribution: 'Emerytalne', 
-          employeePart: CalculatorComponent.PENSION_EMPLOYEE_PART, 
+          employeePart: UmowaOPraceComponent.PENSION_EMPLOYEE_PART, 
           employeeValue: this.skEmerytalnaPracownik, 
-          employerPart: CalculatorComponent.PENSION_EMPLOYER_PART, 
+          employerPart: UmowaOPraceComponent.PENSION_EMPLOYER_PART, 
           employerValue: this.skEmerytalnaPracodawca,
         },
         {
           contribution: 'Rentowe', 
-          employeePart: CalculatorComponent.DISABILITY_EMPLOYEE_PART, 
+          employeePart: UmowaOPraceComponent.DISABILITY_EMPLOYEE_PART, 
           employeeValue: this.skRentowaPracownik, 
-          employerPart: CalculatorComponent.DISABILITY_EMPLOYER_PART, 
+          employerPart: UmowaOPraceComponent.DISABILITY_EMPLOYER_PART, 
           employerValue: this.skRentowaPracodawca
         },
         {
           contribution: 'Chorobowe', 
-          employeePart: CalculatorComponent.SICKNESS_EMPLOYEE_PART, 
+          employeePart: UmowaOPraceComponent.SICKNESS_EMPLOYEE_PART, 
           employeeValue: this.skChorobowaPracownik, 
           employerPart: 0, 
           employerValue: 0
@@ -355,10 +370,17 @@ export class UmowaOPraceComponent {
         if(!(this.basedParameters.grossIncome > 0) || !this.basedParameters.isTaxFreeAmount){
           return 0;
         }
-        else{
-          return 425;
-        }
+        return this.basedParameters.isNowyLad ? 425 : 300;
       }
+      case 2023:
+        {
+          if(!(this.basedParameters.grossIncome > 0) || !this.basedParameters.isTaxFreeAmount){
+            return 0;
+          }
+          else{
+            return 300;
+          }
+        }
       default:
         return 0;
       
@@ -451,12 +473,28 @@ export class UmowaOPraceComponent {
                           + this.skChorobowaPracownik)*100)/100;
   }
   
+  private calculateTaxContributions_2023(){
+    this.taxContributions.taxFreeAmount = this.dajKwoteWolnaOdPodatku();
+    this.taxContributions.incomeCost = this.dajKwoteKosztow();
+    this.taxContributions.middleClassRelief = 0;
+    this.taxContributions.baseOfTax = this.obliczPodstaweOpodatkowania();
+    this.taxContributions.tax = Math.round(this.taxContributions.baseOfTax*UmowaOPraceComponent.FIRST_TAX_RATE_2022/100);
+    this.taxContributions.taxFreeHealthyPart= 0;
+    this.taxContributions.advanceTax = Math.round((this.taxContributions.tax - this.taxContributions.taxFreeAmount)*100)/100;
+    if(this.basedParameters.isUnder26Age){
+      this.taxContributions.advanceTax = 0.00;
+    }
+    if(this.taxContributions.advanceTax < 0){
+      this.taxContributions.advanceTax = 0;
+    }
+  }
+
   private calculateTaxContributions_2022(){
     this.taxContributions.taxFreeAmount = this.dajKwoteWolnaOdPodatku();
     this.taxContributions.incomeCost = this.dajKwoteKosztow();
     this.taxContributions.middleClassRelief = this.obliczUlgeKlasySredniej(this.basedParameters.grossIncome, this.basedParameters.isPPK);
     this.taxContributions.baseOfTax = this.obliczPodstaweOpodatkowania();
-    this.taxContributions.tax = Math.round(this.taxContributions.baseOfTax*CalculatorComponent.FIRST_TAX_RATE/100);
+    this.taxContributions.tax = Math.round(this.taxContributions.baseOfTax*UmowaOPraceComponent.FIRST_TAX_RATE_2021/100);
     this.taxContributions.taxFreeHealthyPart= 0;
     this.taxContributions.advanceTax = Math.round((this.taxContributions.tax - this.taxContributions.taxFreeAmount)*100)/100;
     if(this.basedParameters.isUnder26Age){
@@ -472,7 +510,7 @@ export class UmowaOPraceComponent {
     this.taxContributions.incomeCost = this.dajKwoteKosztow();
     this.taxContributions.middleClassRelief= 0;
     this.taxContributions.baseOfTax = this.obliczPodstaweOpodatkowania();
-    this.taxContributions.tax = Math.round(this.taxContributions.baseOfTax*CalculatorComponent.FIRST_TAX_RATE/100);
+    this.taxContributions.tax = Math.round(this.taxContributions.baseOfTax*UmowaOPraceComponent.FIRST_TAX_RATE_2021/100);
     this.taxContributions.taxFreeHealthyPart= Math.round(this.healthyContributions.baseOfHealthyContribution*0.0775*100)/100;
     this.taxContributions.advanceTax = Math.round((this.taxContributions.tax - this.taxContributions.taxFreeAmount - this.taxContributions.taxFreeHealthyPart));
     if(this.basedParameters.isUnder26Age){
@@ -540,12 +578,12 @@ export class UmowaOPraceComponent {
   
   getMonthlyPensionPart(month_number: number){
     if(this.basedParameters.grossIncome>0){
-      if(month_number*this.basedParameters.grossIncome<CalculatorComponent.MAX_BASE_PENSION_PART){
+      if(month_number*this.basedParameters.grossIncome<UmowaOPraceComponent.MAX_BASE_PENSION_PART){
         return this.skEmerytalnaPracownik;
       }
       else{
-        if(month_number*this.basedParameters.grossIncome-CalculatorComponent.MAX_BASE_PENSION_PART<this.basedParameters.grossIncome){
-          return Math.round(CalculatorComponent.PENSION_EMPLOYEE_PART*(month_number*this.basedParameters.grossIncome-CalculatorComponent.MAX_BASE_PENSION_PART))/100;
+        if(month_number*this.basedParameters.grossIncome-UmowaOPraceComponent.MAX_BASE_PENSION_PART<this.basedParameters.grossIncome){
+          return Math.round(UmowaOPraceComponent.PENSION_EMPLOYEE_PART*(month_number*this.basedParameters.grossIncome-UmowaOPraceComponent.MAX_BASE_PENSION_PART))/100;
         }
         else{
           return 0;
@@ -557,12 +595,12 @@ export class UmowaOPraceComponent {
   
   getMonthlyDisabilityPart(month_number: number){
     if(this.basedParameters.grossIncome>0){
-      if(month_number*this.basedParameters.grossIncome<CalculatorComponent.MAX_BASE_PENSION_PART){
+      if(month_number*this.basedParameters.grossIncome<UmowaOPraceComponent.MAX_BASE_PENSION_PART){
         return this.skRentowaPracownik;
       }
       else{
-        if(month_number*this.basedParameters.grossIncome-CalculatorComponent.MAX_BASE_PENSION_PART<this.basedParameters.grossIncome){
-          return Math.round(CalculatorComponent.DISABILITY_EMPLOYEE_PART*(month_number*this.basedParameters.grossIncome-CalculatorComponent.MAX_BASE_PENSION_PART))/100;
+        if(month_number*this.basedParameters.grossIncome-UmowaOPraceComponent.MAX_BASE_PENSION_PART<this.basedParameters.grossIncome){
+          return Math.round(UmowaOPraceComponent.DISABILITY_EMPLOYEE_PART*(month_number*this.basedParameters.grossIncome-UmowaOPraceComponent.MAX_BASE_PENSION_PART))/100;
         }
         else{
           return 0;
