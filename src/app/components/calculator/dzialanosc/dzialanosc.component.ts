@@ -1,14 +1,14 @@
-import { Component } from '@angular/core';
+import { AfterContentChecked, AfterContentInit, AfterViewChecked, AfterViewInit, Component, DoCheck, OnChanges, OnDestroy, OnInit } from '@angular/core';
 import { CalculatorComponent } from '../calculator.component';
 
-type TaxYears = Array<{year: number, podstawaWymiaru: number}>;
+type TaxYears = Array<{year: number, podstawaWymiaru: number, przecietneWynagrodzenie: number}>;
 
 @Component({
   selector: 'app-dzialanosc',
   templateUrl: './dzialanosc.component.html',
   styleUrls: ['./dzialanosc.component.css']
 })
-export class DzialanoscComponent {
+export class DzialanoscComponent implements OnInit, OnChanges, AfterContentInit, AfterContentChecked, DoCheck, AfterViewInit, AfterViewChecked, OnDestroy{
 
 static PENSION_B2B_PART : number = 19.52;
 static SICKNESS_B2B_PART : number = 2.45;
@@ -19,10 +19,6 @@ static HEALTHY_B2B_PART_SKALA : number = 9.0;
 static EMPLOYMENT_FUND : number = 2.45;
 static TOTAL_B2B_PART : number = DzialanoscComponent.PENSION_B2B_PART + DzialanoscComponent.SICKNESS_B2B_PART + 
 DzialanoscComponent.DISABILITY_B2B_PART + DzialanoscComponent.ACCIDENT_B2B_PART + DzialanoscComponent.EMPLOYMENT_FUND;
-
-static RYCZALT_PART_1 : number = 335.94;
-static RYCZALT_PART_2 : number = 559.89;
-static RYCZALT_PART_3 : number = 1007.81;
 
   taxYears: TaxYears;
   contractsType: any[];
@@ -86,17 +82,17 @@ static RYCZALT_PART_3 : number = 1007.81;
   {
     id: "2",
     value: "Mały ZUS",
-    podstawaWymiaru: 903
+    podstawaWymiaru: 0.3
   },
   {
     id: "3",
     value: "Mały ZUS plus",
-    podstawaWymiaru: 903
+    podstawaWymiaru: 0.3
   },
   {
     id: "4",
     value: "Pełny ZUS",
-    podstawaWymiaru: 3553.20
+    podstawaWymiaru: 1
   }
   ];
 
@@ -122,18 +118,50 @@ static RYCZALT_PART_3 : number = 1007.81;
   selectedCategory: any = null;
   selectedYear: any = null;
 
+
+  ngOnChanges(){
+    console.log("ngOnChanges")
+  }
+  ngOnInit(){
+    //console.log("ngOnInit")
+  }
+  ngDoCheck(){
+    //console.log("ngDoCheck")
+  }
+  ngAfterContentInit(){
+    //console.log("ngAfterContentInit")
+  }
+  
+  ngAfterViewInit(){
+    //console.log("ngAfterViewInit")
+  }
+
+  ngAfterContentChecked(){
+    ///console.log("ngAfterContentChecked")
+  }
+  ngAfterViewChecked(){
+    //console.log("ngAfterViewChecked")
+  }
+  ngOnDestroy(){
+    //console.log("ngOnDestroy")
+  }
+
   constructor() {    
     this.taxYears = [
       {
-        year: 2022,
-        podstawaWymiaru: 3553.2
+        year: 2024,
+        podstawaWymiaru: 4694.4,
+        przecietneWynagrodzenie: 7767.85
+
       },
       {
-        year: 2023,
-        podstawaWymiaru: 4161
+        year: 2025,
+        podstawaWymiaru: 5203.8,
+        przecietneWynagrodzenie: 8400.85
       }
     ]
     ;
+  
     this.contractsType = ['Umowa o Pracę', 'Działalnośc Gospodarcza'];
     this.basedParameters.contractType = 'Działalnośc Gospodarcza';
     this.contributions = [
@@ -176,8 +204,10 @@ static RYCZALT_PART_3 : number = 1007.81;
   }
 
 obliczKwoty(){
+  console.log("test")
     if(this.checkValidation()){
-      this.calculateZUSContributions();
+      var podstawaWymiaru = this.selectedYear.podstawaWymiaru * this.selectedCategory.podstawaWymiaru ;
+      this.calculateZUSContributions(podstawaWymiaru);
       this.calculateHealthyContributions();
 
       this.calculateTaxContributions_2022();
@@ -187,31 +217,31 @@ obliczKwoty(){
         {
           contribution: 'Emerytalne', 
           valueInPercent: DzialanoscComponent.PENSION_B2B_PART, 
-          podstawaWymiaru:  this.selectedCategory.podstawaWymiaru,
+          podstawaWymiaru: podstawaWymiaru,
           valueInZl: this.skEmerytalnaDzialanosc,
         },
         {
           contribution: 'Rentowe', 
           valueInPercent: DzialanoscComponent.DISABILITY_B2B_PART, 
-          podstawaWymiaru: this.selectedCategory.podstawaWymiaru, 
+          podstawaWymiaru: podstawaWymiaru,
           valueInZl: this.skRentowaDzialanosc
         },
         {
           contribution: 'Chorobowe', 
           valueInPercent: DzialanoscComponent.SICKNESS_B2B_PART, 
-          podstawaWymiaru:  this.selectedCategory.podstawaWymiaru, 
+          podstawaWymiaru: podstawaWymiaru,
           valueInZl: this.skChorobowaDzialanosc
         },
         {
           contribution: 'Wypadkowe', 
           valueInPercent: DzialanoscComponent.ACCIDENT_B2B_PART, 
-          podstawaWymiaru: this.selectedCategory.podstawaWymiaru, 
+          podstawaWymiaru: podstawaWymiaru,
           valueInZl: this.skWypadkowaDzialanosc
         },
         {
           contribution: 'Fundusz Pracy', 
           valueInPercent: DzialanoscComponent.EMPLOYMENT_FUND, 
-          podstawaWymiaru: this.selectedCategory.podstawaWymiaru, 
+          podstawaWymiaru: podstawaWymiaru,
           valueInZl: this.skFunduszPracyDzialalnosc
         }
       ];
@@ -249,18 +279,25 @@ obliczKwoty(){
       this.healthyContributions.baseOfHealthyContribution =  this.basedParameters.grossIncome;
       this.healthyContributions.valueInPercent = DzialanoscComponent.HEALTHY_B2B_PART_LINIOWY;
     } else {
-      this.healthyContributions.baseOfHealthyContribution = this.selectedCategory.podstawaWymiaru;
+      var healthyContributionsPart = 0.6;
+      if(this.basedParameters.grossIncome > 5000 && this.basedParameters.grossIncome < 25000) {
+        healthyContributionsPart = 1
+      } else {
+        healthyContributionsPart = 1.8
+      }
+
+      this.healthyContributions.baseOfHealthyContribution = Math.round(this.selectedYear.przecietneWynagrodzenie*healthyContributionsPart*100)/100;
       this.healthyContributions.valueInPercent = DzialanoscComponent.HEALTHY_B2B_PART_SKALA;
     }
-    this.healthyContributions.valueInZl = Math.round(this.healthyContributions.baseOfHealthyContribution*this.healthyContributions.valueInPercent*100)/10000;
+    this.healthyContributions.valueInZl = Math.round(this.healthyContributions.baseOfHealthyContribution*this.healthyContributions.valueInPercent)/100;
   }
   
-  private calculateZUSContributions(){
-    this.skEmerytalnaDzialanosc = Math.round(DzialanoscComponent.PENSION_B2B_PART*this.selectedCategory.podstawaWymiaru)/100;
-    this.skChorobowaDzialanosc =Math.round( DzialanoscComponent.SICKNESS_B2B_PART*this.selectedCategory.podstawaWymiaru)/100;
-    this.skRentowaDzialanosc = Math.round(DzialanoscComponent.DISABILITY_B2B_PART*this.selectedCategory.podstawaWymiaru)/100;
-    this.skWypadkowaDzialanosc = Math.round(DzialanoscComponent.ACCIDENT_B2B_PART*this.selectedCategory.podstawaWymiaru)/100;
-    this.skFunduszPracyDzialalnosc = Math.round(DzialanoscComponent.EMPLOYMENT_FUND*this.selectedCategory.podstawaWymiaru)/100;
+  private calculateZUSContributions(podstawa :number){
+    this.skEmerytalnaDzialanosc = Math.round(DzialanoscComponent.PENSION_B2B_PART*podstawa)/100;
+    this.skChorobowaDzialanosc =Math.round( DzialanoscComponent.SICKNESS_B2B_PART*podstawa)/100;
+    this.skRentowaDzialanosc = Math.round(DzialanoscComponent.DISABILITY_B2B_PART*podstawa)/100;
+    this.skWypadkowaDzialanosc = Math.round(DzialanoscComponent.ACCIDENT_B2B_PART*podstawa)/100;
+    this.skFunduszPracyDzialalnosc = Math.round(DzialanoscComponent.EMPLOYMENT_FUND*podstawa)/100;
     this.razemDzialanoscZUS = Math.round((this.skEmerytalnaDzialanosc + this.skRentowaDzialanosc + this.skChorobowaDzialanosc + this.skWypadkowaDzialanosc + this.skFunduszPracyDzialalnosc)*100)/100;
   }
   
@@ -284,6 +321,7 @@ obliczKwoty(){
   }
   
   private checkValidation() : boolean{
+    console.log(this.basedParameters);
     if(this.selectedYear == null 
       || this.basedParameters.contractType === ''
       || this.basedParameters.grossIncome == null 

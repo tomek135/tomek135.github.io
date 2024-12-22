@@ -38,12 +38,6 @@
               suffix="%"
               ></p-inputNumber>
         </div>
-      
-        <div class="pole-formularza" *ngIf="basedParameters.taxYear==2022">
-          <label class="parametry-formularza" for="isTaxFreeAmount"> Zasady przed 01.07.2022: </label>
-          <mat-slide-toggle [(ngModel)]="basedParameters.isNowyLad" (change)="obliczKwoty()" id="isNowyLad">
-          </mat-slide-toggle>
-        </div>
 
         <div class="pole-formularza">
           <label class="parametry-formularza" for="isTaxFreeAmount"> Czy uwzględniać kwotę wolną od podatku: </label>
@@ -167,6 +161,9 @@
                 </div>
                 <hr class="style1">
                 <div class="form-group row">
+                  <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Koszty pracownika </label>
+                </div>
+                <div class="form-group row">
                   <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">ZUS: </label>
                   <div class="col-sm-4">
                     <input type="text" disabled 
@@ -174,7 +171,7 @@
                     class="form-control form-control-sm" id="colFormLabelSm" >
                   </div>
                   <div class="col-sm-2 col-form-label col-form-label-sm">
-                    <label>{{summaryParameters.zusPercent}} %</label>
+                    <label>{{summaryParameters.employee.zusPercent}} %</label>
                   </div>
                 </div>
                 <div class="form-group row">
@@ -185,7 +182,7 @@
                     class="form-control form-control-sm" id="colFormLabelSm">
                   </div>
                   <div class="col-sm-2 col-form-label col-form-label-sm">
-                    <label>{{summaryParameters.nfzPercent}} %</label>
+                    <label>{{summaryParameters.employee.nfzPercent}} %</label>
                   </div>
                 </div>
                 <div class="form-group row" *ngIf="basedParameters.isPPK">
@@ -196,7 +193,7 @@
                     class="form-control form-control-sm" id="colFormLabelSm">
                   </div>
                   <div class="col-sm-2 col-form-label col-form-label-sm">
-                    <label>{{summaryParameters.ppkPercent}} %</label>
+                    <label>{{summaryParameters.employee.ppkPercent}} %</label>
                   </div>
                 </div>
                 <div class="form-group row">
@@ -207,7 +204,7 @@
                     class="form-control form-control-sm" id="colFormLabelSm">
                   </div>
                   <div class="col-sm-2 col-form-label col-form-label-sm">
-                    <label>{{summaryParameters.taxPercent}} %</label>
+                    <label>{{summaryParameters.employee.taxPercent}} %</label>
                   </div>
                 </div>
                   <hr class="style1">
@@ -224,7 +221,55 @@
                 </div>
                 <hr class="style1">
                 <div class="form-group row">
-                  <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Koszt pracodawcy: </label>
+                  <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Koszty pracodawcy </label>
+                </div>
+                <div class="form-group row">
+                  <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">ZUS: </label>
+                  <div class="col-sm-4">
+                    <input type="text" disabled 
+                    [(ngModel)]="razemPracodawcaZUS"
+                    class="form-control form-control-sm" id="colFormLabelSm" >
+                  </div>
+                  <div class="col-sm-2 col-form-label col-form-label-sm">
+                    <label>{{summaryParameters.employer.zusPercent}} %</label>
+                  </div>
+                </div>
+                <div class="form-group row" *ngIf="basedParameters.isPPK">
+                  <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">PPK: </label>
+                  <div class="col-sm-4">
+                    <input type="text" disabled 
+                    [(ngModel)]="ppkParameters.ppkEmployerAmount"
+                    class="form-control form-control-sm" id="colFormLabelSm">
+                  </div>
+                  <div class="col-sm-2 col-form-label col-form-label-sm">
+                    <label>{{summaryParameters.employer.ppkPercent}} %</label>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Fundusz Pracy: </label>
+                  <div class="col-sm-4">
+                    <input type="text" disabled 
+                    [(ngModel)]="employerContributions.labourFund"
+                    class="form-control form-control-sm" id="colFormLabelSm">
+                  </div>
+                  <div class="col-sm-2 col-form-label col-form-label-sm">
+                    <label>{{summaryParameters.employer.labourFundPercent}} %</label>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">FGŚP: </label>
+                  <div class="col-sm-4">
+                    <input type="text" disabled 
+                    [(ngModel)]="employerContributions.fgsp"
+                    class="form-control form-control-sm" id="colFormLabelSm">
+                  </div>
+                  <div class="col-sm-2 col-form-label col-form-label-sm">
+                    <label>{{summaryParameters.employer.fgspPercent}} %</label>
+                  </div>
+                </div>
+                <hr class="style1">
+                <div class="form-group row">
+                  <label for="colFormLabelSm" class="col-sm-6 col-form-label col-form-label-sm">Całkowity koszt pracodawcy: </label>
                   <div class="col-sm-4">
                     <input type="text" disabled 
                     [(ngModel)]="basedParameters.totalEmployerCosts"
@@ -328,11 +373,9 @@
               </tr>
               <tr>
                   <th>Koszt uzyskania przychodu</th>
-                  <th *ngIf="basedParameters.taxYear == 2022">Ulga klasy średniej</th>
                   <th>Podstawa opodatkowania</th>
                   <th>Obliczony podatek</th>
                   <th>Kwota wolna od podatku</th>
-                  <th *ngIf="basedParameters.taxYear == 2021">Część składki zdrowotnej do odliczenia</th>
                   <th>Zaliczka na podatek</th>
               </tr>
           </ng-template>
@@ -340,16 +383,17 @@
               <tr>
                   <td></td>
                   <td>{{taxContributions.incomeCost}} zł</td>
-                  <td *ngIf="basedParameters.taxYear == 2022">{{taxContributions.middleClassRelief}} zł</td>
                   <td>{{taxContributions.baseOfTax}} zł</td>
                   <td>{{taxContributions.tax}} zł</td>
                   <td>{{taxContributions.taxFreeAmount}} zł</td>
-                  <td *ngIf="basedParameters.taxYear == 2021">{{taxContributions.taxFreeHealthyPart}} zł</td>
                   <td>{{taxContributions.advanceTax}} zł</td>
               </tr>
           </ng-template>
         </p-table>
         </p-tabPanel>
+
+        <!--nie potrzebne-->
+        <!--
         <p-tabPanel header="Rozliczenie roczne pracownika">
           <p-table [value]="months" responsiveLayout="scroll">
             <ng-template pTemplate="header">
@@ -448,7 +492,9 @@
             </ng-template>
         </p-table>
         </p-tabPanel>
+      -->
     </p-tabView>
+
   </div>
 
 
